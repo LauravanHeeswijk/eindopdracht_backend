@@ -1,4 +1,4 @@
-package com.example.backend_eindopdracht.security;
+package nl.laura.boekenapi.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
