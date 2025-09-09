@@ -28,4 +28,7 @@ public class BookUpdateRequest {
     public void setAuthorId(Long authorId) { this.authorId = authorId; }
     public Set<Long> getCategoryIds() { return categoryIds; }
     public void setCategoryIds(Set<Long> categoryIds) { this.categoryIds = categoryIds; }
+
+    public void setCategoryId(Object o) {
+    }
 }
