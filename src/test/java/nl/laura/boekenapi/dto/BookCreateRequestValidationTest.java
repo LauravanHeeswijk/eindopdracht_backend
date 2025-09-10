@@ -11,10 +11,8 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Doel: checken dat de regels (@NotBlank, @Min, @Max, @Positive, @NotNull)
- * op de DTO werken. Geen Spring nodig, alleen Bean Validation.
- */
+//Doel: checken of de regels (@NotBlank, @Min, @Max, @Positive, @NotNull) werken.
+
 class BookCreateRequestValidationTest {
 
     private static Validator validator;
@@ -25,12 +23,11 @@ class BookCreateRequestValidationTest {
         validator = factory.getValidator();
     }
 
-    // Handig: één geldige basis die we per test een beetje aanpassen
     private BookCreateRequest valid() {
         BookCreateRequest r = new BookCreateRequest();
         r.setTitle("Clean Code");
         r.setIsbn("9780132350884");
-        r.setPublicationYear(2008);
+        r.setPublicationYear(2012);
         r.setAuthorId(1L);
         r.setCategoryId(10L);
         return r;
@@ -53,7 +50,7 @@ class BookCreateRequestValidationTest {
     @Test
     void jaarTeLaag_geeftFoutOpPublicationYear() {
         var r = valid();
-        r.setPublicationYear(1200); // lager dan @Min(1400)
+        r.setPublicationYear(2010); // lager dan @Min(2011)
         var violations = validator.validate(r);
         assertTrue(hasErrorOn(violations, "publicationYear"), "We verwachten een fout op 'publicationYear'");
     }
@@ -74,7 +71,6 @@ class BookCreateRequestValidationTest {
         assertTrue(hasErrorOn(violations, "categoryId"), "We verwachten een fout op 'categoryId'");
     }
 
-    // Mini-hulpje: leest prettig en is heel simpel
     private static <T> boolean hasErrorOn(Set<ConstraintViolation<T>> violations, String field) {
         for (ConstraintViolation<T> v : violations) {
             if (v.getPropertyPath().toString().equals(field)) return true;

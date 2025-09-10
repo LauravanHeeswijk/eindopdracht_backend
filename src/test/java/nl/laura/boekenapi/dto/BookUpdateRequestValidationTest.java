@@ -11,9 +11,8 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Zelfde idee als bij create: we testen de regels op de Update-DTO.
- */
+//Zelfde idee als bij create: we testen de regels op de Update DTO.
+
 class BookUpdateRequestValidationTest {
 
     private static Validator validator;
@@ -27,10 +26,10 @@ class BookUpdateRequestValidationTest {
     private BookUpdateRequest valid() {
         BookUpdateRequest r = new BookUpdateRequest();
         r.setTitle("Clean Code (2nd)");
-        r.setIsbn("9780132350884");    // haal weg als ISBN bij jou optioneel is
-        r.setPublicationYear(2010);
+        r.setIsbn("9780132350884");
+        r.setPublicationYear(2012);
         r.setAuthorId(1L);
-        r.setCategoryId(10L);          // 1 categorie
+        r.setCategoryId(10L);
         return r;
     }
 
@@ -51,7 +50,7 @@ class BookUpdateRequestValidationTest {
     @Test
     void jaarTeHoog_geeftFoutOpPublicationYear() {
         var r = valid();
-        r.setPublicationYear(2500); // hoger dan @Max(2100)
+        r.setPublicationYear(2027); // hoger dan @Max(2026)
         var violations = validator.validate(r);
         assertTrue(hasErrorOn(violations, "publicationYear"), "We verwachten een fout op 'publicationYear'");
     }
