@@ -26,7 +26,6 @@ class BookUpdateRequestValidationTest {
     private BookUpdateRequest valid() {
         BookUpdateRequest r = new BookUpdateRequest();
         r.setTitle("Clean Code (2nd)");
-        r.setIsbn("9780132350884");
         r.setPublicationYear(2012);
         r.setAuthorId(1L);
         r.setCategoryId(10L);

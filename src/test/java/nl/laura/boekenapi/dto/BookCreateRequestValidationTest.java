@@ -26,7 +26,6 @@ class BookCreateRequestValidationTest {
     private BookCreateRequest valid() {
         BookCreateRequest r = new BookCreateRequest();
         r.setTitle("Clean Code");
-        r.setIsbn("9780132350884");
         r.setPublicationYear(2012);
         r.setAuthorId(1L);
         r.setCategoryId(10L);
