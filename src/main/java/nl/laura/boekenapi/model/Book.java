@@ -1,4 +1,3 @@
-// src/main/java/nl/laura/boekenapi/model/Book.java
 package nl.laura.boekenapi.model;
 
 import jakarta.persistence.*;
@@ -12,12 +11,14 @@ public class Book {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, length = 200)
     private String title;
 
     @Column(columnDefinition = "text")
     private String description;
 
-    private Integer year;
+    @Column(name = "publication_year")
+    private Integer publicationYear;
 
     @ManyToOne
     @JoinColumn(name = "author_id")
@@ -28,6 +29,7 @@ public class Book {
     private Category category;
 
     @OneToOne
+    @JoinColumn(name = "file_asset_id")
     private FileAsset fileAsset;
 
     @OneToMany(mappedBy = "book")
@@ -38,6 +40,7 @@ public class Book {
 
     public Book() {}
 
+    // getters/setters ...
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -47,8 +50,8 @@ public class Book {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    public Integer getYear() { return year; }
-    public void setYear(Integer year) { this.year = year; }
+    public Integer getPublicationYear() { return publicationYear; }
+    public void setPublicationYear(Integer publicationYear) { this.publicationYear = publicationYear; }
 
     public Author getAuthor() { return author; }
     public void setAuthor(Author author) { this.author = author; }
