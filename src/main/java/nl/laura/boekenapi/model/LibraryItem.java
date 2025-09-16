@@ -1,4 +1,3 @@
-// src/main/java/nl/laura/boekenapi/model/LibraryItem.java
 package nl.laura.boekenapi.model;
 
 import jakarta.persistence.*;
