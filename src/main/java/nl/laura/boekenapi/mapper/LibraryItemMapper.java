@@ -7,12 +7,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class LibraryItemMapper {
 
-    public LibraryItemResponse toResponse(LibraryItem item) {
-        if (item == null) return null;
-
-        LibraryItemResponse dto = new LibraryItemResponse();
-        dto.setId(item.getId());
-        dto.setBookId(item.getBook() != null ? item.getBook().getId() : null);
-        return dto;
+    public LibraryItemResponse toResponse(LibraryItem li) {
+        return new LibraryItemResponse(
+                li.getId(),
+                li.getUser().getId(),
+                li.getBook().getId(),
+                li.getBook().getTitle(),
+                li.getAddedAt()
+        );
     }
 }
