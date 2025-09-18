@@ -1,6 +1,6 @@
 package nl.laura.boekenapi.mapper;
 
-import nl.laura.boekenapi.dto.BookCreateRequest;
+import nl.laura.boekenapi.dto.BookRequest;
 import nl.laura.boekenapi.dto.BookResponse;
 import nl.laura.boekenapi.model.Author;
 import nl.laura.boekenapi.model.Book;
@@ -17,7 +17,7 @@ class BookMapperTest {
 
     @Test
     void toEntity_zetEenvoudigeVelden() {
-        BookCreateRequest req = new BookCreateRequest();
+        BookRequest req = new BookRequest();
         req.setTitle("Discipline Is Destiny");
         req.setPublicationYear(2022);
 

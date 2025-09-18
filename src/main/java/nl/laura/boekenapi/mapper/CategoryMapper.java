@@ -6,16 +6,13 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CategoryMapper {
+    public CategoryResponse toResponse(Category c) {
+        if (c == null) return null;
+        var dto = new CategoryResponse();
 
-    // Doel: van Category naar CategoryResponse (wat je terugstuurt)
-    public CategoryResponse toResponse(Category category) {
-        if (category == null) {
-            return null;
-        }
+        dto.setId(c.getId());
+        dto.setName(c.getName());
 
-        CategoryResponse dto = new CategoryResponse();
-        dto.setId(category.getId());
-        dto.setName(category.getName());
         return dto;
     }
 }

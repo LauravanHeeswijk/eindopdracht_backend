@@ -8,21 +8,25 @@ public class BookUpdateRequest {
     @Size(max = 200)
     private String title;
 
+    @Size(max = 10_000)
+    private String description;
+
     @NotNull
-    @Min(2011)
-    @Max(2026)
+    @Min(0) @Max(3000)      // simpele sanity-check
     private Integer publicationYear;
 
     @NotNull
-    @Positive
     private Long authorId;
 
-    @NotNull @Positive
+    @NotNull
     private Long categoryId;
 
-    // Getters en setters
+    // getters & setters
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
     public Integer getPublicationYear() { return publicationYear; }
     public void setPublicationYear(Integer publicationYear) { this.publicationYear = publicationYear; }

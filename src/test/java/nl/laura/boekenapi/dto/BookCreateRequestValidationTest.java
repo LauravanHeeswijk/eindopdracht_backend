@@ -23,8 +23,8 @@ class BookCreateRequestValidationTest {
         validator = factory.getValidator();
     }
 
-    private BookCreateRequest valid() {
-        BookCreateRequest r = new BookCreateRequest();
+    private BookRequest valid() {
+        BookRequest r = new BookRequest();
         r.setTitle("Clean Code");
         r.setPublicationYear(2012);
         r.setAuthorId(1L);
