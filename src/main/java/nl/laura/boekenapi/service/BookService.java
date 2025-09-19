@@ -45,13 +45,11 @@ public class BookService {
 
     public BookResponse getBookById(Long id) {
         Book book = bookRepository.findById(id)
-<<<<<<< HEAD
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Boek met id " + id + " niet gevonden"));
-=======
-                .orElseThrow(() -> new ResourceNotFoundException("Boek met id " + id + " is niet gevonden"));
->>>>>>> origin/main
+                .orElseThrow(() -> new ResourceNotFoundException("Boek met id " + id + " niet gevonden"));
         return bookMapper.toResponse(book);
+    }
+
+    private void orElseThrow(Object o) {
     }
 
     @Transactional
