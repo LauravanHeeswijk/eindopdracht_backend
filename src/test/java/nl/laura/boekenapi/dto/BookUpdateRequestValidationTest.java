@@ -11,7 +11,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-//Zelfde idee als bij create: we testen de regels op de Update DTO.
+//Doel: checken of de regels (@NotBlank, @Min, @Max, @Positive, @NotNull) werken.
 
 class BookUpdateRequestValidationTest {
 
@@ -23,9 +23,9 @@ class BookUpdateRequestValidationTest {
         validator = factory.getValidator();
     }
 
-    private BookUpdateRequest valid() {
-        BookUpdateRequest r = new BookUpdateRequest();
-        r.setTitle("Clean Code (2nd)");
+    private BookRequest valid() {
+        BookRequest r = new BookRequest();
+        r.setTitle("Clean Code");
         r.setPublicationYear(2012);
         r.setAuthorId(1L);
         r.setCategoryId(10L);
@@ -41,31 +41,31 @@ class BookUpdateRequestValidationTest {
     @Test
     void legeTitel_geeftFoutOpTitle() {
         var r = valid();
-        r.setTitle("");
+        r.setTitle("   "); // leeg/alleen spaties
         var violations = validator.validate(r);
         assertTrue(hasErrorOn(violations, "title"), "We verwachten een fout op 'title'");
     }
 
     @Test
-    void jaarTeHoog_geeftFoutOpPublicationYear() {
+    void jaarTeLaag_geeftFoutOpPublicationYear() {
         var r = valid();
-        r.setPublicationYear(2027); // hoger dan @Max(2026)
+        r.setPublicationYear(2010); // lager dan @Min(2011)
         var violations = validator.validate(r);
         assertTrue(hasErrorOn(violations, "publicationYear"), "We verwachten een fout op 'publicationYear'");
     }
 
     @Test
-    void authorIdNegatief_geeftFoutOpAuthorId() {
+    void authorIdNull_geeftFoutOpAuthorId() {
         var r = valid();
-        r.setAuthorId(-5L);
+        r.setAuthorId(null);
         var violations = validator.validate(r);
         assertTrue(hasErrorOn(violations, "authorId"), "We verwachten een fout op 'authorId'");
     }
 
     @Test
-    void categoryIdNull_geeftFoutOpCategoryId() {
+    void categoryIdNulOfNegatief_geeftFoutOpCategoryId() {
         var r = valid();
-        r.setCategoryId(null);
+        r.setCategoryId(0L); // moet > 0 zijn
         var violations = validator.validate(r);
         assertTrue(hasErrorOn(violations, "categoryId"), "We verwachten een fout op 'categoryId'");
     }
