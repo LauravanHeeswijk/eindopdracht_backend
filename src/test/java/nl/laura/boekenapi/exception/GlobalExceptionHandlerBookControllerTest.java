@@ -19,7 +19,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = BookController.class)
-@AutoConfigureMockMvc(addFilters = false)   // <== ENIGE NIEUWE REGEL
+@AutoConfigureMockMvc(addFilters = false)
 @Import(GlobalExceptionHandler.class)
 class GlobalExceptionHandlerBookControllerTest {
 

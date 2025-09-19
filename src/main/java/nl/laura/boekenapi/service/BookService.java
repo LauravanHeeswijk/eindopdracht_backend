@@ -35,7 +35,7 @@ public class BookService {
     public BookResponse getBookById(Long id) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("Book with id " + id + " not found"));
+                        new ResourceNotFoundException("Boek met id " + id + " niet gevonden"));
         return bookMapper.toResponse(book);
     }
 }
