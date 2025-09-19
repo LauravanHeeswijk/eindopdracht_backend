@@ -6,17 +6,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class AuthorMapper {
+    public AuthorResponse toResponse(Author a) {
+        if (a == null) return null;
+        var dto = new AuthorResponse();
 
-    // Doel: Author naar AuthorResponse (wat je terugstuurt)
-    public AuthorResponse toResponse(Author author) {
-        if (author == null) {
-            return null;
-        }
-
-        AuthorResponse dto = new AuthorResponse();
-
-        dto.setId(author.getId());
-        dto.setName(author.getName());
+        dto.setId(a.getId());
+        dto.setName(a.getName());
 
         return dto;
     }

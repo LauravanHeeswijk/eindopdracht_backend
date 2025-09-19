@@ -1,7 +1,7 @@
 package nl.laura.boekenapi.mapper;
 
 import nl.laura.boekenapi.dto.AuthorResponse;
-import nl.laura.boekenapi.dto.BookCreateRequest;
+import nl.laura.boekenapi.dto.BookRequest;
 import nl.laura.boekenapi.dto.BookResponse;
 import nl.laura.boekenapi.dto.CategoryResponse;
 import nl.laura.boekenapi.model.Author;
@@ -23,18 +23,14 @@ public class BookMapper {
         this.categoryMapper = categoryMapper;
     }
 
-
-    // Doel: Entity -> Response (uitgaand)
     public BookResponse toResponse(Book book) {
-        if (book == null) {
-            return null;
-        }
+        if (book == null) return null;
 
         BookResponse dto = new BookResponse();
         dto.setId(book.getId());
         dto.setTitle(book.getTitle());
+        dto.setDescription(book.getDescription());
         dto.setPublicationYear(book.getPublicationYear());
-
 
         AuthorResponse authorDto = authorMapper.toResponse(book.getAuthor());
         CategoryResponse categoryDto = categoryMapper.toResponse(book.getCategory());
@@ -46,29 +42,45 @@ public class BookMapper {
 
     public List<BookResponse> toResponseList(List<Book> books) {
         List<BookResponse> result = new ArrayList<>();
-        if (books == null) {
-            return result;
-        }
+        if (books == null) return result;
         for (Book b : books) {
             result.add(toResponse(b));
         }
         return result;
     }
 
-    // Doel: CreateRequest -> NIEUWE Entity (ingaand)
-    public Book toEntity(BookCreateRequest req, Author author, Category category) {
-        if (req == null) {
-            return null;
-        }
+    public Book toEntity(BookRequest req, Author author, Category category) {
+        if (req == null) return null;
 
         Book book = new Book();
         book.setTitle(req.getTitle());
+        book.setDescription(req.getDescription());
         book.setPublicationYear(req.getPublicationYear());
-
-
         book.setAuthor(author);
         book.setCategory(category);
-
         return book;
     }
+<<<<<<< HEAD
+=======
+
+    public void updateEntity (BookUpdateRequest req, Book target, Author author, Category category) {
+        if (req == null || target == null) return;
+
+        if (req.getTitle() != null) {
+            target.setTitle(req.getTitle());
+        }
+        if (req.getDescription() != null) {
+            target.setDescription(req.getDescription());
+        }
+        if (req.getPublicationYear() != null) {
+            target.setPublicationYear(req.getPublicationYear());
+        }
+        if (author != null) {
+            target.setAuthor(author);
+        }
+        if (category != null) {
+            target.setCategory(category);
+        }
+    }
+>>>>>>> origin/main
 }
