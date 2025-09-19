@@ -6,16 +6,18 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-//Zelfde idee als bij create: we testen de regels op de Update DTO.
+@AutoConfigureMockMvc(addFilters = false)
 
 class BookUpdateRequestValidationTest {
 
     private static Validator validator;
+
 
     @BeforeAll
     static void initValidator() {
@@ -23,8 +25,8 @@ class BookUpdateRequestValidationTest {
         validator = factory.getValidator();
     }
 
-    private BookUpdateRequest valid() {
-        BookUpdateRequest r = new BookUpdateRequest();
+    private BookCreateRequest valid() {
+        BookCreateRequest r = new BookCreateRequest();
         r.setTitle("Clean Code (2nd)");
         r.setPublicationYear(2012);
         r.setAuthorId(1L);

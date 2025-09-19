@@ -3,7 +3,6 @@ package nl.laura.boekenapi.mapper;
 import nl.laura.boekenapi.dto.AuthorResponse;
 import nl.laura.boekenapi.dto.BookCreateRequest;
 import nl.laura.boekenapi.dto.BookResponse;
-import nl.laura.boekenapi.dto.BookUpdateRequest;
 import nl.laura.boekenapi.dto.CategoryResponse;
 import nl.laura.boekenapi.model.Author;
 import nl.laura.boekenapi.model.Book;
@@ -71,19 +70,5 @@ public class BookMapper {
         book.setCategory(category);
 
         return book;
-    }
-
-
-    // Doel: UpdateRequest -> BESTAANDE Entity bijwerken (ingaand)
-    public void updateEntity(BookUpdateRequest req, Book target, Author author, Category category) {
-        if (req == null || target == null) {
-            return;
-        }
-
-        target.setTitle(req.getTitle());
-        target.setPublicationYear(req.getPublicationYear());
-
-        target.setAuthor(author);
-        target.setCategory(category);
     }
 }
