@@ -1,7 +1,7 @@
 package nl.laura.boekenapi.service;
 
+import nl.laura.boekenapi.dto.BookRequest;
 import nl.laura.boekenapi.dto.BookResponse;
-import nl.laura.boekenapi.dto.BookRequest; // ← gebruik jouw eigen naam hier
 import nl.laura.boekenapi.exception.ResourceNotFoundException;
 import nl.laura.boekenapi.mapper.BookMapper;
 import nl.laura.boekenapi.model.Author;
@@ -49,25 +49,53 @@ public class BookService {
         return bookMapper.toResponse(book);
     }
 
-    private void orElseThrow(Object o) {
-    }
-
     @Transactional
     public BookResponse create(BookRequest dto) {
         Author author = authorRepository.findById(dto.getAuthorId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Auteur niet gevonden"));
 
         Category category = categoryRepository.findById(dto.getCategoryId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cetagorie niet gevonden"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Categorie niet gevonden"));
 
-        Book b = new Book();
-        b.setTitle(dto.getTitle());
-        b.setDescription(dto.getDescription());
-        b.setPublicationYear(dto.getPublicationYear());
-        b.setAuthor(author);
-        b.setCategory(category);
+        Book book = new Book();
+        book.setTitle(dto.getTitle());
+        book.setDescription(dto.getDescription());
+        book.setPublicationYear(dto.getPublicationYear());
+        book.setAuthor(author);
+        book.setCategory(category);
 
-        Book saved = bookRepository.save(b);
+        Book saved = bookRepository.save(book);
         return bookMapper.toResponse(saved);
+    }
+
+    @Transactional
+    public BookResponse update(Long id, BookRequest dto) {
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Boek met id " + id + " niet gevonden"));
+
+        if (dto.getAuthorId() != null) {
+            Author author = authorRepository.findById(dto.getAuthorId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Auteur niet gevonden"));
+            book.setAuthor(author);
+        }
+        if (dto.getCategoryId() != null) {
+            Category category = categoryRepository.findById(dto.getCategoryId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Categorie niet gevonden"));
+            book.setCategory(category);
+        }
+
+        book.setTitle(dto.getTitle());
+        book.setDescription(dto.getDescription());
+        book.setPublicationYear(dto.getPublicationYear());
+
+        Book saved = bookRepository.save(book);
+        return bookMapper.toResponse(saved);
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Boek met id " + id + " niet gevonden"));
+        bookRepository.delete(book);
     }
 }

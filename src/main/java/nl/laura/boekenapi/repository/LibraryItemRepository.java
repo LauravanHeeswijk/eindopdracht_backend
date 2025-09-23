@@ -7,7 +7,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface LibraryItemRepository extends JpaRepository<LibraryItem, Long> {
-    List<LibraryItem> findAllByUser_Id(Long userId);
-    Optional<LibraryItem> findByUser_IdAndBook_Id(Long userId, Long bookId);
-}
 
+    boolean existsByUserIdAndBookId(Long userId, Long bookId);
+
+    Optional<LibraryItem> findByUserIdAndBookId(Long userId, Long bookId);
+
+    List<LibraryItem> findAllByUserId(Long userId);
+}

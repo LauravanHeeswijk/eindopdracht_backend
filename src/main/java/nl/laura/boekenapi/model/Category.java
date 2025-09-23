@@ -1,17 +1,19 @@
-// src/main/java/nl/laura/boekenapi/model/Category.java
 package nl.laura.boekenapi.model;
 
 import jakarta.persistence.*;
 import java.util.List;
 
 @Entity
-@Table(name = "categories")
+@Table(name = "categories", indexes = {
+        @Index(name = "idx_categories_name", columnList = "name", unique = true)
+})
 public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = true) // <-- verplicht en uniek
     private String name;
 
     @OneToMany(mappedBy = "category")
