@@ -1,53 +1,67 @@
+// src/main/java/nl/laura/boekenapi/controller/LibraryController.java
 package nl.laura.boekenapi.controller;
 
-import jakarta.validation.constraints.Positive;
 import nl.laura.boekenapi.dto.LibraryItemResponse;
-import nl.laura.boekenapi.mapper.LibraryItemMapper;
-import nl.laura.boekenapi.model.LibraryItem;
-import nl.laura.boekenapi.service.LibraryItemService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
+import nl.laura.boekenapi.service.LibraryService;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
+import java.security.Principal;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/library")
-@Validated
+@RequestMapping("/api/me/library")
 public class LibraryController {
 
-    private final LibraryItemService service;
-    private final LibraryItemMapper libraryItemMapper;
+    private static final String DEV_FALLBACK_EMAIL = "laura@example.com"; // bestaat in data.sql
+    private final LibraryService libraryService;
 
-    public LibraryController(LibraryItemService service, LibraryItemMapper libraryItemMapper) {
-        this.service = service;
-        this.libraryItemMapper = libraryItemMapper;
+    public LibraryController(LibraryService libraryService) {
+        this.libraryService = libraryService;
     }
 
-    // GET /api/library?userId=1
-    @GetMapping
-    public List<LibraryItemResponse> list(@RequestParam @Positive Long userId) {
-        return service.getLibraryForUser(userId)
-                .stream()
-                .map(libraryItemMapper::toResponse)
-                .toList();
+    private String resolveEmail(Principal principal, String headerEmail) {
+        if (principal != null) return principal.getName();
+        if (headerEmail != null && !headerEmail.isBlank()) return headerEmail;
+        return DEV_FALLBACK_EMAIL;
     }
 
-    // POST /api/library/{bookId}?userId=1
     @PostMapping("/{bookId}")
-    public ResponseEntity<LibraryItemResponse> add(@PathVariable @Positive Long bookId,
-                                                   @RequestParam @Positive Long userId) {
-        LibraryItem created = service.addBook(userId, bookId);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(libraryItemMapper.toResponse(created));
+    public ResponseEntity<LibraryItemResponse> add(
+            @PathVariable Long bookId,
+            Principal principal,
+            @RequestHeader(value = "X-Dev-User", required = false) String headerEmail) {
+
+        var email = resolveEmail(principal, headerEmail);
+        var created = libraryService.addToLibrary(email, bookId);
+
+        // Location: .../api/me/library/{newId}
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequestUri()              // bv. .../api/me/library/2
+                .replacePath("/api/me/library/{id}")  // → .../api/me/library/{id}
+                .buildAndExpand(created.getId())      // → .../api/me/library/10
+                .toUri();
+
+        return ResponseEntity.created(location).body(created); // 201 + Location
     }
 
-    // DELETE /api/library/{bookId}?userId=1
+    @GetMapping
+    public List<LibraryItemResponse> list(
+            Principal principal,
+            @RequestHeader(value = "X-Dev-User", required = false) String headerEmail) {
+        var email = resolveEmail(principal, headerEmail);
+        return libraryService.listMyLibrary(email);
+    }
+
     @DeleteMapping("/{bookId}")
-    public ResponseEntity<Void> remove(@PathVariable @Positive Long bookId,
-                                       @RequestParam @Positive Long userId) {
-        service.removeBook(userId, bookId);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> remove(
+            @PathVariable Long bookId,
+            Principal principal,
+            @RequestHeader(value = "X-Dev-User", required = false) String headerEmail) {
+        var email = resolveEmail(principal, headerEmail);
+        libraryService.removeFromLibrary(email, bookId);
+        return ResponseEntity.noContent().build(); // idempotent
     }
 }

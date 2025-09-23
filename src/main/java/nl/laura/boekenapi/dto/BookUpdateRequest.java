@@ -4,24 +4,24 @@ import jakarta.validation.constraints.*;
 
 public class BookUpdateRequest {
 
-    @NotBlank
-    @Size(max = 200)
+    @Size(min = 1, max = 200, message = "title must be 1..200 characters when provided")
     private String title;
 
-    @Size(max = 10_000)
+    @Size(max = 10_000, message = "description max 10.000 characters")
     private String description;
 
-    @NotNull
-    @Min(0) @Max(3000)      // simpele sanity-check
+    @Min(value = 0, message = "publicationYear must be >= 0")
+    @Max(value = 3000, message = "publicationYear must be <= 3000")
     private Integer publicationYear;
 
-    @NotNull
+    @Positive(message = "authorId must be positive")
     private Long authorId;
 
-    @NotNull
+
+    @Positive(message = "categoryId must be positive")
     private Long categoryId;
 
-    // getters & setters
+
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
 

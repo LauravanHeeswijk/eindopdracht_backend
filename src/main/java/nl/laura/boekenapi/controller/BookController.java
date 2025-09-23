@@ -1,41 +1,49 @@
 package nl.laura.boekenapi.controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
 import nl.laura.boekenapi.dto.BookRequest;
 import nl.laura.boekenapi.dto.BookResponse;
 import nl.laura.boekenapi.service.BookService;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Validated
 @RestController
-@RequestMapping(path = "/api/books", produces = "application/json")
+@RequestMapping(value = "/api/books", produces = MediaType.APPLICATION_JSON_VALUE)
 public class BookController {
 
-    private final BookService bookService;
+    private final BookService service;
 
-    public BookController(BookService bookService) {
-        this.bookService = bookService;
+    public BookController(BookService service) {
+        this.service = service;
     }
 
-    @GetMapping({"", "/"})
-    public ResponseEntity<List<BookResponse>> getAllBooks() {
-        return ResponseEntity.ok(bookService.getAllBooks());
+    @GetMapping
+    public List<BookResponse> getAll() {
+        return service.getAllBooks();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<BookResponse> getBookById(@PathVariable @Positive Long id) {
-        return ResponseEntity.ok(bookService.getBookById(id));
+    public BookResponse getOne(@PathVariable Long id) {
+        return service.getBookById(id);
     }
 
-    @PostMapping(consumes = "application/json")
-    public ResponseEntity<BookResponse> create(@RequestBody @Valid BookRequest dto) {
-        BookResponse created = bookService.create(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    public BookResponse create(@Valid @RequestBody BookRequest req) {
+        return service.create(req);
+    }
+
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public BookResponse update(@PathVariable Long id, @Valid @RequestBody BookRequest req) {
+        return service.update(id, req);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT) // jouw test verwacht 204
+    public void delete(@PathVariable Long id) {
+        service.delete(id);
     }
 }

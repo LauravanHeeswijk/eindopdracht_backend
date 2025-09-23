@@ -4,17 +4,27 @@ import jakarta.persistence.*;
 import java.util.List;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", indexes = {
+        @Index(name = "idx_users_email", columnList = "email", unique = true)
+})
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = true)   // <-- email verplicht en uniek
     private String email;
+
+    @Column(nullable = false)                  // <-- hash mag niet null zijn
     private String passwordHash;
+
+    @Column(nullable = false)
     private String displayName;
-    private String role; // "USER" of "ADMIN"
+
+    @Enumerated(EnumType.STRING)               // <-- enum opslag als string
+    @Column(nullable = false)
+    private Role role;                          // USER of ADMIN
 
     @OneToMany(mappedBy = "user")
     private List<LibraryItem> libraryItems;
@@ -36,8 +46,8 @@ public class User {
     public String getDisplayName() { return displayName; }
     public void setDisplayName(String displayName) { this.displayName = displayName; }
 
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
+    public Role getRole() { return role; }
+    public void setRole(Role role) { this.role = role; }
 
     public List<LibraryItem> getLibraryItems() { return libraryItems; }
     public void setLibraryItems(List<LibraryItem> libraryItems) { this.libraryItems = libraryItems; }
