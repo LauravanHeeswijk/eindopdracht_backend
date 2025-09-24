@@ -3,15 +3,17 @@ package nl.laura.boekenapi.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.laura.boekenapi.dto.BookRequest;
 import nl.laura.boekenapi.dto.BookResponse;
+import nl.laura.boekenapi.exception.DuplicateResourceException;
+import nl.laura.boekenapi.exception.GlobalExceptionHandler;
 import nl.laura.boekenapi.exception.ResourceNotFoundException;
 import nl.laura.boekenapi.service.BookService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -26,31 +28,18 @@ import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-/**
- * Controller-slice test (géén DB). We mocken de service en verifiëren alleen de HTTP-laag.
- * Zet addFilters=false zodat Spring Security je tests niet blokkeert.
- */
 @WebMvcTest(BookController.class)
 @AutoConfigureMockMvc(addFilters = false)
+@Import(GlobalExceptionHandler.class) // neem de handler mee in de slice-test
 class BookControllerTest {
 
-    @Autowired
-    MockMvc mockMvc;
-
-    @Autowired
-    ObjectMapper objectMapper;
-
-    @MockBean
-    BookService bookService;
-
-    // ---------- helpers ----------
+    @Autowired MockMvc mockMvc;
+    @Autowired ObjectMapper objectMapper;
+    @MockBean BookService bookService;
 
     private BookResponse sampleResponse(Long id) {
         BookResponse r = new BookResponse();
-        // pas aan op jouw DTO-velden:
-        // verwacht: id, title, description, publicationYear, authorId/categoryId óf namen
         try {
-            // Veel DTO’s hebben setters; als jij een builder/constructor gebruikt, pas dit aan.
             var idField = r.getClass().getDeclaredField("id");
             idField.setAccessible(true);
             idField.set(r, id);
@@ -59,14 +48,11 @@ class BookControllerTest {
             titleField.setAccessible(true);
             titleField.set(r, "The Obstacle Is The Way");
 
-            // Optioneel extra velden:
             setIfPresent(r, "description", "Stoïcijnse gids voor tegenslag");
             setIfPresent(r, "publicationYear", 2014);
             setIfPresent(r, "authorId", 1L);
             setIfPresent(r, "categoryId", 10L);
-        } catch (NoSuchFieldException | IllegalAccessException ignored) {
-            // Als jouw DTO geen bijbehorende velden heeft, negeren we dat – test blijft nuttig.
-        }
+        } catch (NoSuchFieldException | IllegalAccessException ignored) { }
         return r;
     }
 
@@ -80,7 +66,6 @@ class BookControllerTest {
 
     private BookRequest sampleRequest() {
         BookRequest req = new BookRequest();
-        // pas aan op jouw DTO-velden:
         setIfPresent(req, "title", "Ego Is The Enemy");
         setIfPresent(req, "description", "Over het temmen van je ego");
         setIfPresent(req, "publicationYear", 2016);
@@ -89,7 +74,7 @@ class BookControllerTest {
         return req;
     }
 
-    // ---------- tests ----------
+    // Testen
 
     @Test
     @DisplayName("GET /api/books → 200 + lijst")
@@ -101,7 +86,7 @@ class BookControllerTest {
 
         mockMvc.perform(get("/api/books"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].id", is(1)))
                 .andExpect(jsonPath("$[0].title", not(emptyOrNullString())));
@@ -117,23 +102,26 @@ class BookControllerTest {
 
         mockMvc.perform(get("/api/books/{id}", id))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id", is(42)))
                 .andExpect(jsonPath("$.title", not(emptyOrNullString())));
     }
 
     @Test
-    @DisplayName("GET /api/books/{id} (niet gevonden) → 404")
-    void getById_whenMissing_returns404() throws Exception {
+    @DisplayName("GET /api/books/{id} (niet gevonden) → 404 + uniform JSON")
+    void getById_whenMissing_returns404WithApiError() throws Exception {
         var missingId = 9999L;
 
         given(bookService.getBookById(missingId))
                 .willThrow(new ResourceNotFoundException("Boek met id 9999 niet gevonden"));
 
         mockMvc.perform(get("/api/books/{id}", missingId))
-                .andExpect(status().isNotFound());
-        // Als je ProblemDetail verwacht, moet je ResponseStatusException gebruiken i.p.v. @ResponseStatus
-        // en dan ook contentType + $.detail testen.
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.message").value("Boek met id 9999 niet gevonden"))
+                .andExpect(jsonPath("$.path").value("/api/books/9999"));
     }
 
     @Test
@@ -147,9 +135,8 @@ class BookControllerTest {
         mockMvc.perform(post("/api/books")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
-                // Best practice is 201; als jouw controller 200 terugstuurt, verander dit naar isOk()
                 .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id", is(100)));
     }
 
@@ -169,7 +156,7 @@ class BookControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id", is(7)))
                 .andExpect(jsonPath("$.title", is("Discipline Is Destiny")));
     }
@@ -185,13 +172,66 @@ class BookControllerTest {
     }
 
     @Test
-    @DisplayName("DELETE /api/books/{id} (niet gevonden) → 404")
-    void delete_missing_returns404() throws Exception {
+    @DisplayName("DELETE /api/books/{id} (niet gevonden) → 404 + uniform JSON")
+    void delete_missing_returns404WithApiError() throws Exception {
         var id = 12345L;
         doThrow(new ResourceNotFoundException("Boek met id " + id + " niet gevonden"))
                 .when(bookService).delete(id);
 
         mockMvc.perform(delete("/api/books/{id}", id))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.message").value("Boek met id 12345 niet gevonden"))
+                .andExpect(jsonPath("$.path").value("/api/books/12345"));
+    }
+
+    @Test
+    @DisplayName("POST /api/books (ongeldig) → 400 + uniform JSON (validatie)")
+    void create_invalid_returns400WithApiError() throws Exception {
+        String invalidBody = """
+          {"title": ""}
+        """;
+
+        mockMvc.perform(post("/api/books")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidBody))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").exists())
+                .andExpect(jsonPath("$.path").value("/api/books"));
+    }
+
+    @Test
+    @DisplayName("POST /api/books (duplicaat) → 409 + uniform JSON")
+    void create_duplicate_returns409WithApiError() throws Exception {
+        var req = sampleRequest();
+        given(bookService.create(any(BookRequest.class)))
+                .willThrow(new DuplicateResourceException("Titel bestaat al"));
+
+        mockMvc.perform(post("/api/books")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isConflict())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(409))
+                .andExpect(jsonPath("$.message").value("Titel bestaat al"))
+                .andExpect(jsonPath("$.path").value("/api/books"));
+    }
+
+    @Test
+    @DisplayName("POST /api/books (kapotte JSON) → 400 + uniform JSON (parse-fout)")
+    void create_brokenJson_returns400WithApiError() throws Exception {
+        String brokenJson = "{\"title\":\"Ego Is The Enemy\"";
+
+        mockMvc.perform(post("/api/books")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(brokenJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("Ongeldige gegevens"))
+                .andExpect(jsonPath("$.path").value("/api/books"));
     }
 }

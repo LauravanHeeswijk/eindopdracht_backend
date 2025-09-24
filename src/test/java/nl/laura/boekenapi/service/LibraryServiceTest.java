@@ -32,10 +32,8 @@ class LibraryServiceTest {
     @Mock private BookRepository bookRepository;
     @Mock private UserRepository userRepository;
 
-    // Echte mapper gebruiken, maar via Mockito beheren
     @Spy  private LibraryItemMapper libraryItemMapper = new LibraryItemMapper();
 
-    // Laat Mockito de constructor injecteren (niet zelf new-en!)
     @InjectMocks private LibraryService service;
 
     @Test
