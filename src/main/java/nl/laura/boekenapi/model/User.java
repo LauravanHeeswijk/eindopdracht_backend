@@ -8,23 +8,21 @@ import java.util.List;
         @Index(name = "idx_users_email", columnList = "email", unique = true)
 })
 public class User {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)   // <-- email verplicht en uniek
+    @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)                  // <-- hash mag niet null zijn
+    @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
     @Column(nullable = false)
     private String displayName;
 
-    @Enumerated(EnumType.STRING)               // <-- enum opslag als string
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Role role;                          // USER of ADMIN
+    private Role role;
 
     @OneToMany(mappedBy = "user")
     private List<LibraryItem> libraryItems;

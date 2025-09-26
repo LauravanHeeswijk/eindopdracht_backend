@@ -11,8 +11,19 @@ SELECT 'Productivity'
     WHERE NOT EXISTS (SELECT 1 FROM categories WHERE name = 'Productivity');
 
 INSERT INTO users (id, email, password_hash, display_name, role)
-SELECT 1, 'laura@example.com', 'secret', 'Laura', 'USER'
+SELECT 1,
+       'laura@example.com',
+       '$2a$10$fOEdjJNKKpMRF.dfkBUgqOcc/8AUYrnXNWsWWs11cX3c1Cg0/PCC.',
+       'Laura',
+       'USER'
     WHERE NOT EXISTS (SELECT 1 FROM users WHERE id = 1);
+
+INSERT INTO users (id, email, password_hash, display_name, role)
+SELECT 2, 'admin@example.com',
+       '$2a$10$l81TtEkVCrMTn/raiK92k.QF0LwXHqimFgFMxwoMteZqIuGPP97A6', -- hash van "secret"
+       'Admin', 'ADMIN'
+    WHERE NOT EXISTS (SELECT 1 FROM users WHERE id = 2);
+
 
 INSERT INTO books (id, title, description, publication_year, author_id, category_id)
 SELECT 1,

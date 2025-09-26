@@ -37,7 +37,7 @@ public class LibraryService {
 
     @Transactional
     public LibraryItemResponse addToLibrary(String userEmail, Long bookId) {
-        User user = userRepository.findByEmail(userEmail)
+        User user = userRepository.findByEmailIgnoreCase(userEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userEmail));
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new ResourceNotFoundException("Book not found: id=" + bookId));
@@ -61,7 +61,7 @@ public class LibraryService {
 
     @Transactional
     public void removeFromLibrary(String userEmail, Long bookId) {
-        User user = userRepository.findByEmail(userEmail)
+        User user = userRepository.findByEmailIgnoreCase(userEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userEmail));
 
         libraryItemRepository.findByUserIdAndBookId(user.getId(), bookId)
@@ -71,7 +71,7 @@ public class LibraryService {
 
     @Transactional(readOnly = true)
     public List<LibraryItemResponse> listMyLibrary(String userEmail) {
-        User user = userRepository.findByEmail(userEmail)
+        User user = userRepository.findByEmailIgnoreCase(userEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userEmail));
 
         return libraryItemRepository.findAllByUserId(user.getId())

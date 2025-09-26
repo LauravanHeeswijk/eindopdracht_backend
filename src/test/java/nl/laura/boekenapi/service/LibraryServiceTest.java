@@ -41,7 +41,7 @@ class LibraryServiceTest {
         var user = new User(); user.setId(1L); user.setEmail("e@x.com");
         var book = new Book(); book.setId(2L); book.setTitle("Stoic");
 
-        when(userRepository.findByEmail("e@x.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailIgnoreCase("e@x.com")).thenReturn(Optional.of(user));
         when(bookRepository.findById(2L)).thenReturn(Optional.of(book));
         when(libraryItemRepository.existsByUserIdAndBookId(1L, 2L)).thenReturn(false);
 
@@ -61,8 +61,8 @@ class LibraryServiceTest {
     void addToLibrary_duplicate_throws409() {
         var user = new User(); user.setId(1L); user.setEmail("e@x.com");
         var book = new Book(); book.setId(2L);
-
-        when(userRepository.findByEmail("e@x.com")).thenReturn(Optional.of(user));
+        
+        when(userRepository.findByEmailIgnoreCase("e@x.com")).thenReturn(Optional.of(user));
         when(bookRepository.findById(2L)).thenReturn(Optional.of(book));
         when(libraryItemRepository.existsByUserIdAndBookId(1L, 2L)).thenReturn(true);
 
@@ -73,7 +73,7 @@ class LibraryServiceTest {
     void addToLibrary_bookNotFound_throws404() {
         var user = new User(); user.setId(1L); user.setEmail("e@x.com");
 
-        when(userRepository.findByEmail("e@x.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailIgnoreCase("e@x.com")).thenReturn(Optional.of(user));
         when(bookRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> service.addToLibrary("e@x.com", 999L));
@@ -85,7 +85,7 @@ class LibraryServiceTest {
         var book = new Book(); book.setId(2L); book.setTitle("Stoic");
         var li = new LibraryItem(); li.setId(5L); li.setUser(user); li.setBook(book); li.setAddedAt(LocalDateTime.now());
 
-        when(userRepository.findByEmail("e@x.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailIgnoreCase("e@x.com")).thenReturn(Optional.of(user));
         when(libraryItemRepository.findAllByUserId(1L)).thenReturn(List.of(li));
 
         var list = service.listMyLibrary("e@x.com");
