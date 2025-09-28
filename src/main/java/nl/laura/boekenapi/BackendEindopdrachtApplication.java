@@ -14,8 +14,6 @@ public class BackendEindopdrachtApplication {
         SpringApplication.run(BackendEindopdrachtApplication.class, args);
     }
 
-//    Alleen in Dev testen, bij Prod mag dit onderstaande uit ivm info lekkage.
-
     @Bean
     CommandLineRunner authDebug(UserRepository repo, PasswordEncoder enc) {
         return args -> repo.findByEmailIgnoreCase("laura@example.com")
@@ -25,10 +23,6 @@ public class BackendEindopdrachtApplication {
                             + (u.getPasswordHash() == null ? "null" : u.getPasswordHash().length()));
                     System.out.println("DEBUG matches? " + enc.matches("secret", u.getPasswordHash()));
                 });
-    }
-    @Bean
-    CommandLineRunner printNewHash(PasswordEncoder enc) {
-        return args -> System.out.println("NEW_BCRYPT_HASH=" + enc.encode("secret"));
     }
 }
 
