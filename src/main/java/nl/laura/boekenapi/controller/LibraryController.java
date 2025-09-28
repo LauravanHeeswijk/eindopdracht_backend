@@ -15,7 +15,7 @@ import java.util.List;
 @RequestMapping("/api/me/library")
 public class LibraryController {
 
-    private static final String DEV_FALLBACK_EMAIL = "laura@example.com"; // bestaat in data.sql
+    private static final String DEV_FALLBACK_EMAIL = "laura@example.com";
     private final LibraryService libraryService;
 
     public LibraryController(LibraryService libraryService) {
@@ -37,14 +37,14 @@ public class LibraryController {
         var email = resolveEmail(principal, headerEmail);
         var created = libraryService.addToLibrary(email, bookId);
 
-        // Location: .../api/me/library/{newId}
+        // Location
         URI location = ServletUriComponentsBuilder
-                .fromCurrentRequestUri()              // bv. .../api/me/library/2
-                .replacePath("/api/me/library/{id}")  // → .../api/me/library/{id}
-                .buildAndExpand(created.getId())      // → .../api/me/library/10
+                .fromCurrentRequestUri()
+                .replacePath("/api/me/library/{id}")
+                .buildAndExpand(created.getId())
                 .toUri();
 
-        return ResponseEntity.created(location).body(created); // 201 + Location
+        return ResponseEntity.created(location).body(created);
     }
 
     @GetMapping

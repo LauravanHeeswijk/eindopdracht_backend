@@ -14,18 +14,18 @@ public class DownloadLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)                  // <-- log altijd timestamp
+    @Column(nullable = false)
     private LocalDateTime downloadedAt;
 
-    @Column(length = 64)                       // <-- ipv null/te lang
+    @Column(length = 64)
     private String ipAddress;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "user_id", nullable = false)   // <-- verplicht
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "book_id", nullable = false)   // <-- verplicht
+    @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
     public DownloadLog() {}
