@@ -60,5 +60,15 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleOther(Exception ex, WebRequest req) {
         return build(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error", req);
     }
+
+    @ExceptionHandler(nl.laura.boekenapi.exception.MyFileNotFoundException.class)
+    public ResponseEntity<ApiError> handleFileNotFound(RuntimeException ex, WebRequest req) {
+        return build(HttpStatus.NOT_FOUND, ex.getMessage(), req);
+    }
+
+    @ExceptionHandler(nl.laura.boekenapi.exception.FileStorageException.class)
+    public ResponseEntity<ApiError> handleStorage(RuntimeException ex, WebRequest req) {
+        return build(HttpStatus.BAD_REQUEST, ex.getMessage(), req);
+    }
 }
 

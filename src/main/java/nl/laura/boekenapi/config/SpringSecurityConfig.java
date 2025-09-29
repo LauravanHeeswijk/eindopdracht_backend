@@ -58,14 +58,26 @@ public class SpringSecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+//                        Auth
                         .requestMatchers(HttpMethod.POST, "/authenticate").permitAll()
                         .requestMatchers("/authenticated").authenticated()
+
+//                        Books
                         .requestMatchers(HttpMethod.GET, "/api/books", "/api/books/**").authenticated()
                         .requestMatchers(HttpMethod.POST,   "/api/books/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT,    "/api/books/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/books/**").hasRole("ADMIN")
+
+//                        Files
+                         .requestMatchers(HttpMethod.POST, "/api/files/upload").hasRole("ADMIN")       // upload
+                         .requestMatchers("/api/files/**").hasAnyRole("ADMIN", "USER")
+
+//                        Library
                         .requestMatchers("/api/me/library/**").hasRole("USER")
+
+//                        Default
                         .anyRequest().authenticated()
+
                 );
 
         http.addFilterBefore(jwt, UsernamePasswordAuthenticationFilter.class);
