@@ -77,4 +77,12 @@ public class LibraryService {
         return libraryItemRepository.findAllByUserId(user.getId())
                 .stream().map(libraryItemMapper::toResponse).toList();
     }
+
+    @Transactional(readOnly = true)
+    public boolean hasItem(String userEmail, Long bookId) {
+        User user = userRepository.findByEmailIgnoreCase(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userEmail));
+        return libraryItemRepository.existsByUserIdAndBookId(user.getId(), bookId);
+    }
+
 }

@@ -10,6 +10,10 @@ INSERT INTO categories (name)
 SELECT 'Productivity'
     WHERE NOT EXISTS (SELECT 1 FROM categories WHERE name = 'Productivity');
 
+INSERT INTO categories (name)
+SELECT 'Management'
+    WHERE NOT EXISTS (SELECT 1 FROM categories WHERE name = 'Management');
+
 INSERT INTO users (id, email, password_hash, display_name, role)
 SELECT 1,
        'laura@example.com',
@@ -63,9 +67,41 @@ SELECT 4,
 
 INSERT INTO books (id, title, description, publication_year, author_id, category_id)
 SELECT 5,
-       'Deep Work',
-       'Gefocust, ongestoord werken voor topresultaat.',
+       'The Daily Stoic',
+       '366 meditaties over wijsheid, volharding en levenskunst.',
        2016,
        (SELECT id FROM authors    WHERE name = 'Ryan Holiday'),
-       (SELECT id FROM categories WHERE name = 'Productivity')
+       (SELECT id FROM categories WHERE name = 'Management')
     WHERE NOT EXISTS (SELECT 1 FROM books WHERE id = 5);
+
+INSERT INTO file_assets (id, file_name, file_type, file_size, storage_path)
+SELECT 101, 'atomic-habits.pdf', 'application/pdf', 0, 'atomic-habits.pdf'
+    WHERE NOT EXISTS (SELECT 1 FROM file_assets WHERE id = 101);
+
+INSERT INTO file_assets (id, file_name, file_type, file_size, storage_path)
+SELECT 102, 'ego-is-the-enemy.pdf', 'application/pdf', 0, 'ego-is-the-enemy.pdf'
+    WHERE NOT EXISTS (SELECT 1 FROM file_assets WHERE id = 102);
+
+INSERT INTO file_assets (id, file_name, file_type, file_size, storage_path)
+SELECT 103, 'meditations.pdf', 'application/pdf', 0, 'meditations.pdf'
+    WHERE NOT EXISTS (SELECT 1 FROM file_assets WHERE id = 103);
+
+INSERT INTO file_assets (id, file_name, file_type, file_size, storage_path)
+SELECT 104, 'the-obstacle-is-the-way.pdf', 'application/pdf', 0, 'the-obstacle-is-the-way.pdf'
+    WHERE NOT EXISTS (SELECT 1 FROM file_assets WHERE id = 104);
+
+INSERT INTO file_assets (id, file_name, file_type, file_size, storage_path)
+SELECT 105, 'the-daily-stoic.pdf', 'application/pdf', 0, 'the-daily-stoic.pdf'
+    WHERE NOT EXISTS (SELECT 1 FROM file_assets WHERE id = 105);
+
+UPDATE books SET file_asset_id = 101 WHERE id = 1;
+UPDATE books SET file_asset_id = 102 WHERE id = 2;
+UPDATE books SET file_asset_id = 103 WHERE id = 3;
+UPDATE books SET file_asset_id = 104 WHERE id = 4;
+UPDATE books SET file_asset_id = 105 WHERE id = 5;
+
+-- AND (file_asset_id IS NULL OR file_asset_id <> 105);
+
+
+
+
