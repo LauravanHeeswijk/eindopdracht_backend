@@ -10,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -19,6 +20,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -26,17 +28,28 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("prod")
 class FileControllerTest {
 
-    @Autowired MockMvc mvc;
-    @MockBean JwtRequestFilter jwtRequestFilter;
-    @MockBean CustomUserDetailsService userDetailsService;
-    @MockBean FileStorageService storage;
+    @Autowired
+    MockMvc mvc;
+
+    @MockBean
+    JwtRequestFilter jwtRequestFilter;
+
+    @MockBean
+    CustomUserDetailsService userDetailsService;
+
+    @MockBean
+    FileStorageService storage;
 
     @Test
     @WithMockUser(roles = "USER")
     void download_ok() throws Exception {
         var res = new ByteArrayResource("hi".getBytes()) {
-            @Override public String getFilename() { return "x.pdf"; }
+            @Override
+            public String getFilename() {
+                return "x.pdf";
+            }
         };
+
         Mockito.when(storage.loadFileAsResource(eq("x.pdf"))).thenReturn(res);
 
         mvc.perform(get("/api/files/x.pdf"))
@@ -47,7 +60,11 @@ class FileControllerTest {
     @WithMockUser(roles = "ADMIN")
     void upload_ok() throws Exception {
         var mf = new org.springframework.mock.web.MockMultipartFile(
-                "file", "b.pdf", "application/pdf", "PDF".getBytes());
+                "file",
+                "b.pdf",
+                "application/pdf",
+                "PDF".getBytes()
+        );
 
         Mockito.when(storage.storeFile(any())).thenReturn("b.pdf");
 
@@ -55,3 +72,4 @@ class FileControllerTest {
                 .andExpect(status().isOk());
     }
 }
+

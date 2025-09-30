@@ -1,4 +1,3 @@
-// src/main/java/nl/laura/boekenapi/controller/LibraryController.java
 package nl.laura.boekenapi.controller;
 
 import nl.laura.boekenapi.dto.LibraryItemResponse;

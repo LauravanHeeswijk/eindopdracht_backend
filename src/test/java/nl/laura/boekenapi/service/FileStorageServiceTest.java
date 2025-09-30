@@ -27,8 +27,6 @@ class FileStorageServiceTest {
         String saved1 = service.storeFile(file1);
         assertEquals("boek.pdf", saved1);
         assertTrue(Files.exists(tempDir.resolve("boek.pdf")));
-
-        // Overschrijven toegestaan in jouw implementatie
         MockMultipartFile file2 = new MockMultipartFile(
                 "file", "boek.pdf", "application/pdf", "INHOUD-2".getBytes()
         );

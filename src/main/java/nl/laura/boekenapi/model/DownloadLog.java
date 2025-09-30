@@ -28,6 +28,12 @@ public class DownloadLog {
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
+    @Column(length = 16, nullable = false)
+    private String status;
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
     public DownloadLog() {}
 
     public Long getId() { return id; }
