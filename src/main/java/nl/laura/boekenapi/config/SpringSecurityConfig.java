@@ -20,11 +20,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 public class SpringSecurityConfig {
 
+    // Password hashing (blijft zoals je had)
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    // AuthenticationManager met jouw UserDetailsService (blijft zoals je had)
     @Bean
     public AuthenticationManager authenticationManager(
             CustomUserDetailsService userDetailsService,
@@ -36,6 +38,7 @@ public class SpringSecurityConfig {
         return new ProviderManager(provider);
     }
 
+    // DEV-profiel: alles open + H2-console
     @Bean
     @Profile("dev")
     public SecurityFilterChain devFilterChain(HttpSecurity http) throws Exception {
@@ -49,6 +52,7 @@ public class SpringSecurityConfig {
                 .build();
     }
 
+    // PROD-profiel: JWT, stateless, endpoint-regels + admin-deur
     @Bean
     @Profile("!dev")
     public SecurityFilterChain prodFilterChain(HttpSecurity http, JwtRequestFilter jwt) throws Exception {
@@ -58,29 +62,34 @@ public class SpringSecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-//                        Auth
+                        // Auth
                         .requestMatchers(HttpMethod.POST, "/authenticate").permitAll()
                         .requestMatchers("/authenticated").authenticated()
 
-//                        Books
+                        // Admin routes
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                        // Books
                         .requestMatchers(HttpMethod.GET, "/api/books", "/api/books/**").authenticated()
                         .requestMatchers(HttpMethod.POST,   "/api/books/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT,    "/api/books/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/books/**").hasRole("ADMIN")
 
-//                        Files
-                         .requestMatchers(HttpMethod.POST, "/api/files/upload").hasRole("ADMIN")       // upload
-                         .requestMatchers("/api/files/**").hasAnyRole("ADMIN", "USER")
+                        // Files
+                        .requestMatchers(HttpMethod.POST, "/api/files/upload").hasRole("ADMIN")
+                        .requestMatchers("/api/files/**").hasAnyRole("ADMIN", "USER")
 
-//                        Library
+                        // Library
                         .requestMatchers("/api/me/library/**").hasRole("USER")
 
-//                        Default
+                        // Default
                         .anyRequest().authenticated()
-
                 );
 
+        // JWT-filter vóór de standaard Username/Password filter
         http.addFilterBefore(jwt, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 }
+

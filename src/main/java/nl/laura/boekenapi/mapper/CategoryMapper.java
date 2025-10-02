@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class CategoryMapper {
 
-    // Bestond al — laat zo
     public CategoryResponse toResponse(Category c) {
         if (c == null) return null;
         var dto = new CategoryResponse();
