@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.OffsetDateTime;
 import java.util.stream.Collectors;
@@ -69,6 +70,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(nl.laura.boekenapi.exception.FileStorageException.class)
     public ResponseEntity<ApiError> handleStorage(RuntimeException ex, WebRequest req) {
         return build(HttpStatus.BAD_REQUEST, ex.getMessage(), req);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiError> handleDataIntegrity(DataIntegrityViolationException ex, WebRequest req) {
+        return build(HttpStatus.CONFLICT, "Cannot delete: resource is still in use", req);
     }
 }
 

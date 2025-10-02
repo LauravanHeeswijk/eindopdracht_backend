@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
-@AutoConfigureMockMvc(addFilters = false)   // security uit voor deze controller-test
+@AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("dev")
 class LibraryControllerTest {
 
