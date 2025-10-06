@@ -1,5 +1,8 @@
 package nl.laura.boekenapi.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 import nl.laura.boekenapi.dto.LibraryItemResponse;
 import nl.laura.boekenapi.exception.DuplicateResourceException;
 import nl.laura.boekenapi.exception.ResourceNotFoundException;
@@ -10,40 +13,33 @@ import nl.laura.boekenapi.model.User;
 import nl.laura.boekenapi.repository.BookRepository;
 import nl.laura.boekenapi.repository.LibraryItemRepository;
 import nl.laura.boekenapi.repository.UserRepository;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 @Service
+@Transactional
 public class LibraryService {
 
     private final LibraryItemRepository libraryItemRepository;
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
-    private final LibraryItemMapper libraryItemMapper;
 
-    public LibraryService(LibraryItemRepository libraryItemRepository,
-                          BookRepository bookRepository,
-                          UserRepository userRepository,
-                          LibraryItemMapper libraryItemMapper) {
+    public LibraryService(final LibraryItemRepository libraryItemRepository,
+                          final BookRepository bookRepository,
+                          final UserRepository userRepository) {
         this.libraryItemRepository = libraryItemRepository;
         this.bookRepository = bookRepository;
         this.userRepository = userRepository;
-        this.libraryItemMapper = libraryItemMapper;
     }
 
-    @Transactional
-    public LibraryItemResponse addToLibrary(String userEmail, Long bookId) {
+    public LibraryItemResponse addToLibrary(final String userEmail, final Long bookId) {
         User user = userRepository.findByEmailIgnoreCase(userEmail)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userEmail));
+                .orElseThrow(() -> new ResourceNotFoundException("Gebruiker niet gevonden: " + userEmail));
         Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new ResourceNotFoundException("Book not found: id=" + bookId));
+                .orElseThrow(() -> new ResourceNotFoundException("Boek niet gevonden: " + bookId));
 
-        if (libraryItemRepository.existsByUserIdAndBookId(user.getId(), book.getId())) {
-            throw new DuplicateResourceException("Book already in library");
+        if (libraryItemRepository.countByUserIdAndBookId(user.getId(), book.getId()) > 0) {
+            throw new DuplicateResourceException("Dit boek staat al in je bibliotheek");
         }
 
         LibraryItem li = new LibraryItem();
@@ -51,38 +47,26 @@ public class LibraryService {
         li.setBook(book);
         li.setAddedAt(LocalDateTime.now());
 
-        try {
-            return libraryItemMapper.toResponse(libraryItemRepository.save(li));
-        } catch (DataIntegrityViolationException e) {
-            // fallback als de DB-unique constraint toch toeslaat
-            throw new DuplicateResourceException("Book already in library");
-        }
+        LibraryItem saved = libraryItemRepository.save(li);
+        return LibraryItemMapper.toResponse(saved);
     }
 
-    @Transactional
-    public void removeFromLibrary(String userEmail, Long bookId) {
+    public void removeFromLibrary(final String userEmail, final Long bookId) {
         User user = userRepository.findByEmailIgnoreCase(userEmail)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userEmail));
+                .orElseThrow(() -> new ResourceNotFoundException("Gebruiker niet gevonden: " + userEmail));
 
         libraryItemRepository.findByUserIdAndBookId(user.getId(), bookId)
                 .ifPresent(libraryItemRepository::delete);
-        // idempotent: geen error als item niet bestaat → 204 in controller
+        // idempotent: als er niks is, doen we niks → controller geeft 204
     }
 
     @Transactional(readOnly = true)
-    public List<LibraryItemResponse> listMyLibrary(String userEmail) {
+    public List<LibraryItemResponse> listMyLibrary(final String userEmail) {
         User user = userRepository.findByEmailIgnoreCase(userEmail)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userEmail));
+                .orElseThrow(() -> new ResourceNotFoundException("Gebruiker niet gevonden: " + userEmail));
 
-        return libraryItemRepository.findAllByUserId(user.getId())
-                .stream().map(libraryItemMapper::toResponse).toList();
+        return libraryItemRepository.findAllByUserId(user.getId()).stream()
+                .map(LibraryItemMapper::toResponse)
+                .collect(Collectors.toList());
     }
-
-    @Transactional(readOnly = true)
-    public boolean hasItem(String userEmail, Long bookId) {
-        User user = userRepository.findByEmailIgnoreCase(userEmail)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userEmail));
-        return libraryItemRepository.existsByUserIdAndBookId(user.getId(), bookId);
-    }
-
 }

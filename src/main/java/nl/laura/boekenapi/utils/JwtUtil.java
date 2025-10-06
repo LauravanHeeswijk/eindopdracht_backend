@@ -3,69 +3,66 @@ package nl.laura.boekenapi.utils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.util.Base64;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
 
 @Service
 public class JwtUtil {
 
-    private static final String SECRET_KEY = Base64.getEncoder().encodeToString(
-            "CHANGE_ME_TO_A_LONG_RANDOM_SECRET_32+_CHARS".getBytes()
-    );
+    private final String secret;
+    private final long expirationMs;
 
-    private Key getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
-        return Keys.hmacShaKeyFor(keyBytes);
+    public JwtUtil(
+            @Value("${jwt.secret:CHANGE_ME_TO_A_LONG_RANDOM_SECRET_32+_CHARS}") String secret,
+            @Value("${jwt.expiration-ms:864000000}") long expirationMs
+    ) {
+        this.secret = secret;
+        this.expirationMs = expirationMs;
+    }
+
+    private Key key() {
+        return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
     public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+        return parse(token).getSubject();
     }
 
-    private Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
-    }
-
-    private <T> T extractClaim(String token, Function<Claims, T> resolver) {
-        final Claims claims = extractAllClaims(token);
-        return resolver.apply(claims);
-    }
-
-    private Claims extractAllClaims(String token) {
-        return Jwts.parser().setSigningKey(getSigningKey()).parseClaimsJws(token).getBody();
-    }
-
-    private Boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
-    }
-
-    public String generateToken(UserDetails userDetails) {
-        Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, userDetails.getUsername());
-    }
-
-    private String createToken(Map<String, Object> claims, String subject) {
-        long tenDaysMs = 1000L * 60 * 60 * 24 * 10;
+    public String generateToken(UserDetails user) {
+        long now = System.currentTimeMillis();
         return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(subject)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + tenDaysMs))
-                .signWith(SignatureAlgorithm.HS256, getSigningKey())
+                .setSubject(user.getUsername())
+                .setIssuedAt(new Date(now))
+                .setExpiration(new Date(now + expirationMs))
+                .signWith(key(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public Boolean validateToken(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+    public String usernameIfValid(String token, UserDetails user) {
+        try {
+            Claims c = parse(token);
+            String subject = c.getSubject();
+            Date exp = c.getExpiration();
+            if (subject == null || exp == null) return null;
+            if (!subject.equalsIgnoreCase(user.getUsername())) return null;
+            if (exp.before(new Date())) return null;
+            return subject;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private Claims parse(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 }

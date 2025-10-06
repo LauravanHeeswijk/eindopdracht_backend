@@ -1,6 +1,7 @@
 package nl.laura.boekenapi.model;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -33,12 +34,12 @@ public class Book {
     private FileAsset fileAsset;
 
     @OneToMany(mappedBy = "book")
-    private List<LibraryItem> libraryItems;
+    private List<LibraryItem> libraryItems = new ArrayList<>();
 
     @OneToMany(mappedBy = "book")
-    private List<DownloadLog> downloadLogs;
+    private List<DownloadLog> downloadLogs = new ArrayList<>();
 
-    public Book() {}
+    public Book() { }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -67,3 +68,4 @@ public class Book {
     public List<DownloadLog> getDownloadLogs() { return downloadLogs; }
     public void setDownloadLogs(List<DownloadLog> downloadLogs) { this.downloadLogs = downloadLogs; }
 }
+

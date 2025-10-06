@@ -1,34 +1,38 @@
 package nl.laura.boekenapi.controller;
 
+import jakarta.validation.Valid;
+import java.util.List;
+import nl.laura.boekenapi.dto.CategoryRequest;
 import nl.laura.boekenapi.dto.CategoryResponse;
-import nl.laura.boekenapi.exception.ResourceNotFoundException;
-import nl.laura.boekenapi.mapper.CategoryMapper;
-import nl.laura.boekenapi.repository.CategoryRepository;
+import nl.laura.boekenapi.service.CategoryService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
-@RequestMapping("/api/categories")
+@RequestMapping(value = "/api/categories", produces = MediaType.APPLICATION_JSON_VALUE)
 public class CategoriesController {
 
-    private final CategoryRepository repo;
-    private final CategoryMapper mapper;
+    private final CategoryService service;
 
-    public CategoriesController(CategoryRepository repo, CategoryMapper mapper) {
-        this.repo = repo;
-        this.mapper = mapper;
-    }
+    public CategoriesController(CategoryService service) { this.service = service; }
 
     @GetMapping
-    public List<CategoryResponse> all() {
-        return repo.findAll().stream().map(mapper::toResponse).toList();
-    }
+    public List<CategoryResponse> getAll() { return service.getAll(); }
 
     @GetMapping("/{id}")
-    public CategoryResponse one(@PathVariable Long id) {
-        return repo.findById(id)
-                .map(mapper::toResponse)
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found: " + id));
+    public CategoryResponse getOne(@PathVariable Long id) { return service.getById(id); }
+
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    public CategoryResponse create(@Valid @RequestBody CategoryRequest request) { return service.create(request); }
+
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public CategoryResponse update(@PathVariable Long id, @Valid @RequestBody CategoryRequest request) {
+        return service.update(id, request);
     }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id) { service.delete(id); }
 }

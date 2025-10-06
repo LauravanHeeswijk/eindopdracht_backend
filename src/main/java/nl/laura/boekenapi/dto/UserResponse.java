@@ -8,8 +8,8 @@ public class UserResponse {
     private String displayName;
     private Role role;
 
-    public UserResponse() {}
-
+    public UserResponse() { }
+    
     public UserResponse(Long id, String email, String displayName, Role role) {
         this.id = id;
         this.email = email;

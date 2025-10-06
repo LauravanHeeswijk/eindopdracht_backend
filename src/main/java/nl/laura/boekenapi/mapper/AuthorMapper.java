@@ -3,26 +3,34 @@ package nl.laura.boekenapi.mapper;
 import nl.laura.boekenapi.dto.AuthorRequest;
 import nl.laura.boekenapi.dto.AuthorResponse;
 import nl.laura.boekenapi.model.Author;
-import org.springframework.stereotype.Component;
 
-@Component
-public class AuthorMapper {
+public final class AuthorMapper {
 
-    public AuthorResponse toResponse(Author a) {
-        if (a == null) return null;
-        var dto = new AuthorResponse();
-        dto.setId(a.getId());
-        dto.setName(a.getName());
+    private AuthorMapper() { }
+
+    public static Author toEntity(final AuthorRequest request) {
+        if (request == null) {
+            return null;
+        }
+        Author entity = new Author();
+        entity.setName(request.getName());
+        return entity;
+    }
+
+    public static void updateEntity(final Author entity, final AuthorRequest request) {
+        if (entity == null || request == null) {
+            return;
+        }
+        entity.setName(request.getName());
+    }
+
+    public static AuthorResponse toResponse(final Author entity) {
+        if (entity == null) {
+            return null;
+        }
+        AuthorResponse dto = new AuthorResponse();
+        dto.setId(entity.getId());
+        dto.setName(entity.getName());
         return dto;
-    }
-
-    public Author toEntity(AuthorRequest req) {
-        var a = new Author();
-        updateEntity(a, req);
-        return a;
-    }
-
-    public void updateEntity(Author a, AuthorRequest req) {
-        a.setName(req.getName().trim());
     }
 }

@@ -17,12 +17,11 @@ public class DownloadLogService {
         this.repo = repo;
     }
 
-    public void log(User user, Book book, String ipAddress, String status) {
+    public void log(User user, Book book, String ipAddress) {
         DownloadLog log = new DownloadLog();
         log.setUser(user);
         log.setBook(book);
         log.setIpAddress(ipAddress);
-        log.setStatus(status);
         log.setDownloadedAt(LocalDateTime.now());
         repo.save(log);
     }

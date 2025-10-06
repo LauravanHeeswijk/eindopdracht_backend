@@ -1,34 +1,48 @@
 package nl.laura.boekenapi.controller;
 
+import jakarta.validation.Valid;
+import java.util.List;
+import nl.laura.boekenapi.dto.AuthorRequest;
 import nl.laura.boekenapi.dto.AuthorResponse;
-import nl.laura.boekenapi.exception.ResourceNotFoundException;
-import nl.laura.boekenapi.mapper.AuthorMapper;
-import nl.laura.boekenapi.repository.AuthorRepository;
+import nl.laura.boekenapi.service.AuthorService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
-@RequestMapping("/api/authors")
+@RequestMapping(value = "/api/authors", produces = MediaType.APPLICATION_JSON_VALUE)
 public class AuthorsController {
 
-    private final AuthorRepository repo;
-    private final AuthorMapper mapper;
+    private final AuthorService service;
 
-    public AuthorsController(AuthorRepository repo, AuthorMapper mapper) {
-        this.repo = repo;
-        this.mapper = mapper;
+    public AuthorsController(AuthorService service) {
+        this.service = service;
     }
 
     @GetMapping
-    public List<AuthorResponse> all() {
-        return repo.findAll().stream().map(mapper::toResponse).toList();
+    public List<AuthorResponse> getAll() {
+        return service.getAll();
     }
 
     @GetMapping("/{id}")
-    public AuthorResponse one(@PathVariable Long id) {
-        return repo.findById(id)
-                .map(mapper::toResponse)
-                .orElseThrow(() -> new ResourceNotFoundException("Author not found: " + id));
+    public AuthorResponse getOne(@PathVariable Long id) {
+        return service.getById(id);
+    }
+
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    public AuthorResponse create(@Valid @RequestBody AuthorRequest request) {
+        return service.create(request);
+    }
+
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public AuthorResponse update(@PathVariable Long id, @Valid @RequestBody AuthorRequest request) {
+        return service.update(id, request);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id) {
+        service.delete(id);
     }
 }

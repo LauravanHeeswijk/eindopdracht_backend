@@ -1,13 +1,14 @@
 package nl.laura.boekenapi.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/api/health")
 public class HealthController {
 
-    @GetMapping("/api/health")
-    public String health() {
-        return "up";
+    @GetMapping
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("up");
     }
 }
