@@ -1,4 +1,6 @@
 package nl.laura.boekenapi.service;
+
+import nl.laura.boekenapi.model.User;
 import nl.laura.boekenapi.repository.UserRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.*;
@@ -17,14 +19,16 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
-        var u = users.findByEmailIgnoreCase(usernameOrEmail)
+        User u = users.findByEmailIgnoreCase(usernameOrEmail)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + usernameOrEmail));
+//// Geef gebruiker zijn rol:
+        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + u.getRole().name());
+        List<SimpleGrantedAuthority> authorities = List.of(authority);
 
-        var authority = new SimpleGrantedAuthority("ROLE_" + u.getRole().name());
         return new org.springframework.security.core.userdetails.User(
                 u.getEmail(),
                 u.getPasswordHash(),
-                List.of(authority)
+                authorities
         );
     }
 }

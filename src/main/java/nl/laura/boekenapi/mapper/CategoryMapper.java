@@ -3,26 +3,38 @@ package nl.laura.boekenapi.mapper;
 import nl.laura.boekenapi.dto.CategoryRequest;
 import nl.laura.boekenapi.dto.CategoryResponse;
 import nl.laura.boekenapi.model.Category;
-import org.springframework.stereotype.Component;
 
-@Component
-public class CategoryMapper {
+public final class CategoryMapper {
 
-    public CategoryResponse toResponse(Category c) {
-        if (c == null) return null;
-        var dto = new CategoryResponse();
-        dto.setId(c.getId());
-        dto.setName(c.getName());
+    private CategoryMapper() { }
+
+    public static Category toEntity(final CategoryRequest request) {
+        if (request == null) {
+            return null;
+        }
+        Category entity = new Category();
+        entity.setName(request.getName());
+        return entity;
+    }
+
+    public static void updateEntity(final Category entity, final CategoryRequest request) {
+        if (entity == null || request == null) {
+            return;
+        }
+        entity.setName(request.getName());
+    }
+
+    public static CategoryResponse toResponse(final Category entity) {
+        if (entity == null) {
+            return null;
+        }
+        CategoryResponse dto = new CategoryResponse();
+        dto.setId(entity.getId());
+        dto.setName(entity.getName());
         return dto;
     }
-
-    public Category toEntity(CategoryRequest req) {
-        var c = new Category();
-        updateEntity(c, req);
-        return c;
-    }
-
-    public void updateEntity(Category c, CategoryRequest req) {
-        c.setName(req.getName().trim());
-    }
 }
+
+
+
+

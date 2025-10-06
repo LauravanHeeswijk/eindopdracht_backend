@@ -23,11 +23,12 @@ SELECT 1,
     WHERE NOT EXISTS (SELECT 1 FROM users WHERE id = 1);
 
 INSERT INTO users (id, email, password_hash, display_name, role)
-SELECT 2, 'admin@example.com',
-       '$2a$10$l81TtEkVCrMTn/raiK92k.QF0LwXHqimFgFMxwoMteZqIuGPP97A6', -- hash van "secret"
-       'Admin', 'ADMIN'
+SELECT 2,
+       'admin@example.com',
+       '$2a$10$l81TtEkVCrMTn/raiK92k.QF0LwXHqimFgFMxwoMteZqIuGPP97A6', -- "secret"
+       'Admin',
+       'ADMIN'
     WHERE NOT EXISTS (SELECT 1 FROM users WHERE id = 2);
-
 
 INSERT INTO books (id, title, description, publication_year, author_id, category_id)
 SELECT 1,
@@ -74,33 +75,33 @@ SELECT 5,
        (SELECT id FROM categories WHERE name = 'Management')
     WHERE NOT EXISTS (SELECT 1 FROM books WHERE id = 5);
 
-INSERT INTO file_assets (id, file_name, file_type, file_size, storage_path)
-SELECT 101, 'atomic-habits.pdf', 'application/pdf', 0, 'atomic-habits.pdf'
+/* ==== FIXED: kolomnamen matchen nu je entity (filename, content_type, size) ==== */
+INSERT INTO file_assets (id, filename, content_type, size)
+SELECT 101, 'atomic-habits.pdf', 'application/pdf', 0
     WHERE NOT EXISTS (SELECT 1 FROM file_assets WHERE id = 101);
 
-INSERT INTO file_assets (id, file_name, file_type, file_size, storage_path)
-SELECT 102, 'ego-is-the-enemy.pdf', 'application/pdf', 0, 'ego-is-the-enemy.pdf'
+INSERT INTO file_assets (id, filename, content_type, size)
+SELECT 102, 'ego-is-the-enemy.pdf', 'application/pdf', 0
     WHERE NOT EXISTS (SELECT 1 FROM file_assets WHERE id = 102);
 
-INSERT INTO file_assets (id, file_name, file_type, file_size, storage_path)
-SELECT 103, 'meditations.pdf', 'application/pdf', 0, 'meditations.pdf'
+INSERT INTO file_assets (id, filename, content_type, size)
+SELECT 103, 'meditations.pdf', 'application/pdf', 0
     WHERE NOT EXISTS (SELECT 1 FROM file_assets WHERE id = 103);
 
-INSERT INTO file_assets (id, file_name, file_type, file_size, storage_path)
-SELECT 104, 'the-obstacle-is-the-way.pdf', 'application/pdf', 0, 'the-obstacle-is-the-way.pdf'
+INSERT INTO file_assets (id, filename, content_type, size)
+SELECT 104, 'the-obstacle-is-the-way.pdf', 'application/pdf', 0
     WHERE NOT EXISTS (SELECT 1 FROM file_assets WHERE id = 104);
 
-INSERT INTO file_assets (id, file_name, file_type, file_size, storage_path)
-SELECT 105, 'the-daily-stoic.pdf', 'application/pdf', 0, 'the-daily-stoic.pdf'
+INSERT INTO file_assets (id, filename, content_type, size)
+SELECT 105, 'the-daily-stoic.pdf', 'application/pdf', 0
     WHERE NOT EXISTS (SELECT 1 FROM file_assets WHERE id = 105);
 
+/* Koppel files aan boeken */
 UPDATE books SET file_asset_id = 101 WHERE id = 1;
 UPDATE books SET file_asset_id = 102 WHERE id = 2;
 UPDATE books SET file_asset_id = 103 WHERE id = 3;
 UPDATE books SET file_asset_id = 104 WHERE id = 4;
 UPDATE books SET file_asset_id = 105 WHERE id = 5;
-
--- AND (file_asset_id IS NULL OR file_asset_id <> 105);
 
 
 

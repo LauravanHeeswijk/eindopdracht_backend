@@ -10,25 +10,26 @@ public class FileAsset {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String fileName;
-    private String fileType;
-    private Long fileSize;
-    private String storagePath;
+    @Column(nullable = false, length = 255)
+    private String filename;
 
-    public FileAsset() {}
+    @Column(nullable = false, length = 150)
+    private String contentType;
+
+    @Column(nullable = false)
+    private Long size;
+
+    public FileAsset() { }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
-    public String getFileName() { return fileName; }
-    public void setFileName(String fileName) { this.fileName = fileName; }
+    public String getFilename() { return filename; }
+    public void setFilename(String filename) { this.filename = filename; }
 
-    public String getFileType() { return fileType; }
-    public void setFileType(String fileType) { this.fileType = fileType; }
+    public String getContentType() { return contentType; }
+    public void setContentType(String contentType) { this.contentType = contentType; }
 
-    public Long getFileSize() { return fileSize; }
-    public void setFileSize(Long fileSize) { this.fileSize = fileSize; }
-
-    public String getStoragePath() { return storagePath; }
-    public void setStoragePath(String storagePath) { this.storagePath = storagePath; }
+    public Long getSize() { return size; }
+    public void setSize(Long size) { this.size = size; }
 }

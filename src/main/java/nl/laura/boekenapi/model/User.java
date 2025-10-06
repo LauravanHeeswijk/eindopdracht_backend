@@ -1,36 +1,37 @@
 package nl.laura.boekenapi.model;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "users", indexes = {
-        @Index(name = "idx_users_email", columnList = "email", unique = true)
-})
+@Table(name = "users")
 public class User {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 255)
     private String email;
 
-    @Column(name = "password_hash", nullable = false)
+    @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String displayName;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     private Role role;
 
     @OneToMany(mappedBy = "user")
-    private List<LibraryItem> libraryItems;
+    private List<LibraryItem> libraryItems = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
-    private List<DownloadLog> downloadLogs;
+    private List<DownloadLog> downloadLogs = new ArrayList<>();
 
-    public User() {}
+    public User() { }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

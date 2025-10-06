@@ -1,25 +1,24 @@
 package nl.laura.boekenapi.model;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "authors", indexes = {
-        @Index(name = "idx_authors_name", columnList = "name", unique = true)
-})
+@Table(name = "authors")
 public class Author {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true) // <-- verplicht en uniek
+    @Column(nullable = false, unique = true, length = 100)
     private String name;
 
     @OneToMany(mappedBy = "author")
-    private List<Book> books;
+    private List<Book> books = new ArrayList<>();
 
-    public Author() {}
+    public Author() { }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

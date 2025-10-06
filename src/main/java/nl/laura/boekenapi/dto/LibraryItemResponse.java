@@ -9,8 +9,6 @@ public class LibraryItemResponse {
     private String bookTitle;
     private LocalDateTime addedAt;
 
-    public LibraryItemResponse() {}
-
     public LibraryItemResponse(Long id, Long userId, Long bookId, String bookTitle, LocalDateTime addedAt) {
         this.id = id;
         this.userId = userId;

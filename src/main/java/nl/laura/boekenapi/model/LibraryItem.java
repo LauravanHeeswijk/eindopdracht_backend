@@ -4,10 +4,8 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(
-        name = "library_items",
-        uniqueConstraints = @UniqueConstraint(name = "uk_library_user_book", columnNames = {"user_id", "book_id"})
-)
+@Table(name = "library_items",
+        uniqueConstraints = @UniqueConstraint(name = "unique_library_items_user_book", columnNames = {"user_id", "book_id"}))
 public class LibraryItem {
 
     @Id
@@ -16,15 +14,15 @@ public class LibraryItem {
 
     private LocalDateTime addedAt;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "user_id", nullable = false)   // <-- verplicht
+    @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "book_id", nullable = false)   // <-- verplicht
+    @ManyToOne
+    @JoinColumn(name = "book_id")
     private Book book;
 
-    public LibraryItem() {}
+    public LibraryItem() { }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

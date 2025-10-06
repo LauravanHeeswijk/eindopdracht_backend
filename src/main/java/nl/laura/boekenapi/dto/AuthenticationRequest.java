@@ -1,7 +1,7 @@
 package nl.laura.boekenapi.dto;
 
 public class AuthenticationRequest {
-    private String username; // bij jou = email
+    private String username;
     private String password;
 
     public AuthenticationRequest() {}
