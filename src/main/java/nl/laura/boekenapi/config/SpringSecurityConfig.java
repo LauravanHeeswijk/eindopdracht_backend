@@ -1,4 +1,3 @@
-// src/main/java/nl/laura/boekenapi/config/SpringSecurityConfig.java
 package nl.laura.boekenapi.config;
 
 import nl.laura.boekenapi.filter.JwtRequestFilter;
@@ -8,8 +7,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -45,6 +44,7 @@ public class SpringSecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
 
+                        // Public
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/authenticate", "/api/health", "/h2-console/**").permitAll()
                         .requestMatchers(HttpMethod.GET,
@@ -54,20 +54,25 @@ public class SpringSecurityConfig {
                                 "/api/files/**"
                         ).permitAll()
 
+                        // Authenticated (ingelogd)
                         .requestMatchers("/api/auth/me").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/books/**","/api/authors/**","/api/categories/**"
-                        ).hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/books/**","/api/authors/**","/api/categories/**"
-                        ).hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/books/**","/api/authors/**","/api/categories/**"
-                        ).hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/files/upload").hasRole("ADMIN")
+
+                        // === User library (TOEGEVOEGD) ===
+                        .requestMatchers(HttpMethod.POST,   "/api/me/library/**").hasAnyRole("USER","ADMIN")
+                        .requestMatchers(HttpMethod.GET,    "/api/me/library/**").hasAnyRole("USER","ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/me/library/**").hasAnyRole("USER","ADMIN")
+
+                        // Admin-only CRUD
+                        .requestMatchers(HttpMethod.POST,   "/api/books/**","/api/authors/**","/api/categories").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT,    "/api/books/**","/api/authors/**","/api/categories/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/books/**","/api/authors/**","/api/categories/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST,   "/api/files/upload").hasRole("ADMIN")
+
                         .anyRequest().denyAll()
                 );
-
-        http.headers(h -> h.frameOptions(f -> f.sameOrigin()));
 
         http.addFilterBefore(jwt, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 }
+
