@@ -12,7 +12,7 @@ public class BookRequest {
     private String description;
 
     @NotNull
-    @Min(0) @Max(3000)
+    @Min(2000) @Max(2026)
     private Integer publicationYear;
 
     @NotNull @Positive

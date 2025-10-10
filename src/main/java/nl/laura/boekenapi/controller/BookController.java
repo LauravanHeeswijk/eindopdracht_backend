@@ -45,6 +45,14 @@ public class BookController {
         return ResponseEntity.ok(updated);
     }
 
+    @PutMapping("/{id}/file/{filename}")
+    public ResponseEntity<BookResponse> attachFile(
+            @PathVariable Long id,
+            @PathVariable String filename) {
+        BookResponse updated = service.attachFile(id, filename);
+        return ResponseEntity.ok(updated);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable final Long id) {
         service.delete(id);
