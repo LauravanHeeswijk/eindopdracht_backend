@@ -10,9 +10,11 @@ import nl.laura.boekenapi.mapper.BookMapper;
 import nl.laura.boekenapi.model.Author;
 import nl.laura.boekenapi.model.Book;
 import nl.laura.boekenapi.model.Category;
+import nl.laura.boekenapi.model.FileAsset;
 import nl.laura.boekenapi.repository.AuthorRepository;
 import nl.laura.boekenapi.repository.BookRepository;
 import nl.laura.boekenapi.repository.CategoryRepository;
+import nl.laura.boekenapi.repository.FileAssetRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,13 +25,27 @@ public class BookService {
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
     private final CategoryRepository categoryRepository;
+    private final FileAssetRepository fileRepo;
 
-    public BookService(final BookRepository bookRepository,
-                       final AuthorRepository authorRepository,
-                       final CategoryRepository categoryRepository) {
+    public BookService(BookRepository bookRepository, AuthorRepository authorRepository,
+                       CategoryRepository categoryRepository, FileAssetRepository fileRepo) {
         this.bookRepository = bookRepository;
         this.authorRepository = authorRepository;
         this.categoryRepository = categoryRepository;
+        this.fileRepo = fileRepo;
+    }
+
+    public BookResponse attachFile(Long bookId, String filename) {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new ResourceNotFoundException("Boek niet gevonden: " + bookId));
+
+        FileAsset file = fileRepo.findAll().stream()
+                .filter(f -> f.getFilename().equalsIgnoreCase(filename))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Bestand niet gevonden: " + filename));
+
+        book.setFileAsset(file);
+        return BookMapper.toResponse(book);
     }
 
     @Transactional(readOnly = true)
