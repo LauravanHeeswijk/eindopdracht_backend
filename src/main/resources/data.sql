@@ -1,17 +1,18 @@
--- AUTHORS
 INSERT INTO authors (name)
 SELECT 'Ryan Holiday'
     WHERE NOT EXISTS (SELECT 1 FROM authors WHERE name = 'Ryan Holiday');
 
--- CATEGORIES
+
 INSERT INTO categories (name) SELECT 'Stoicism'
     WHERE NOT EXISTS (SELECT 1 FROM categories WHERE name = 'Stoicism');
+
 INSERT INTO categories (name) SELECT 'Productivity'
     WHERE NOT EXISTS (SELECT 1 FROM categories WHERE name = 'Productivity');
+
 INSERT INTO categories (name) SELECT 'Management'
     WHERE NOT EXISTS (SELECT 1 FROM categories WHERE name = 'Management');
 
--- USERS
+
 INSERT INTO users (email, password_hash, display_name, role)
 SELECT 'laura@example.com',
        '$2a$10$VT1AQkjtOJmc2TPFdH820upX0m3LslmpHzmWUzDj7OxYKpo9NDaWy',
@@ -26,19 +27,19 @@ SELECT 'admin@example.com',
        'ADMIN'
     WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'admin@example.com');
 
--- let op: verwijderde het per ongeluk geplaatste '<' teken in het hashveld
 INSERT INTO users (email, password_hash, display_name, role)
-VALUES ('testuser@example.com',
-        '$2a$10$VT1AQkjtOJmc2TPFdH820upX0m3LslmpHzmWUzDj7OxYKpo9NDaWy',
-        'Test User',
-        'USER')
-    ON CONFLICT (email) DO NOTHING;
+SELECT 'testuser@example.com',
+       '$2a$10$VT1AQkjtOJmc2TPFdH820upX0m3LslmpHzmWUzDj7OxYKpo9NDaWy',
+       'Test User',
+       'USER'
+    WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'testuser@example.com');
+
 
 UPDATE users
 SET password_hash = '$2a$10$VT1AQkjtOJmc2TPFdH820upX0m3LslmpHzmWUzDj7OxYKpo9NDaWy'
 WHERE email IN ('laura@example.com','admin@example.com');
 
--- BOOKS
+
 INSERT INTO books (title, description, publication_year, author_id, category_id)
 SELECT 'Ego Is the Enemy',
        'Hoe je je ego herkent en temt om beter te presteren.',
@@ -79,7 +80,7 @@ SELECT 'The Daily Stoic',
        (SELECT id FROM categories WHERE name = 'Management')
     WHERE NOT EXISTS (SELECT 1 FROM books WHERE title = 'The Daily Stoic');
 
--- FILE ASSETS
+
 INSERT INTO file_assets (filename, content_type, size)
 SELECT 'ego-is-the-enemy.pdf', 'application/pdf', 0
     WHERE NOT EXISTS (SELECT 1 FROM file_assets WHERE filename = 'ego-is-the-enemy.pdf');
@@ -100,54 +101,48 @@ INSERT INTO file_assets (filename, content_type, size)
 SELECT 'the-daily-stoic.pdf', 'application/pdf', 0
     WHERE NOT EXISTS (SELECT 1 FROM file_assets WHERE filename = 'the-daily-stoic.pdf');
 
--- KOPPEL BOOKS -> FILE_ASSETS
--- Gebruik LIMIT 1 in een subselect zodat duplicaten geen error geven.
-UPDATE books b
-SET file_asset_id = fa.id
-    FROM (
+
+UPDATE books
+SET file_asset_id = (
     SELECT id FROM file_assets
     WHERE filename = 'ego-is-the-enemy.pdf'
     ORDER BY id DESC
     LIMIT 1
-) fa
-WHERE b.title = 'Ego Is the Enemy';
+    )
+WHERE title = 'Ego Is the Enemy';
 
-UPDATE books b
-SET file_asset_id = fa.id
-    FROM (
+UPDATE books
+SET file_asset_id = (
     SELECT id FROM file_assets
     WHERE filename = 'the-obstacle-is-the-way.pdf'
     ORDER BY id DESC
     LIMIT 1
-) fa
-WHERE b.title = 'The Obstacle Is the Way';
+    )
+WHERE title = 'The Obstacle Is the Way';
 
-UPDATE books b
-SET file_asset_id = fa.id
-    FROM (
+UPDATE books
+SET file_asset_id = (
     SELECT id FROM file_assets
     WHERE filename = 'meditations.pdf'
     ORDER BY id DESC
     LIMIT 1
-) fa
-WHERE b.title = 'Meditations';
+    )
+WHERE title = 'Meditations';
 
-UPDATE books b
-SET file_asset_id = fa.id
-    FROM (
+UPDATE books
+SET file_asset_id = (
     SELECT id FROM file_assets
     WHERE filename = 'atomic-habits.pdf'
     ORDER BY id DESC
     LIMIT 1
-) fa
-WHERE b.title = 'Atomic Habits';
+    )
+WHERE title = 'Atomic Habits';
 
-UPDATE books b
-SET file_asset_id = fa.id
-    FROM (
+UPDATE books
+SET file_asset_id = (
     SELECT id FROM file_assets
     WHERE filename = 'the-daily-stoic.pdf'
     ORDER BY id DESC
     LIMIT 1
-) fa
-WHERE b.title = 'The Daily Stoic';
+    )
+WHERE title = 'The Daily Stoic';

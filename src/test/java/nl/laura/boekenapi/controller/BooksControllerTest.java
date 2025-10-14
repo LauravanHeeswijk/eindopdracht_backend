@@ -2,6 +2,8 @@ package nl.laura.boekenapi.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.laura.boekenapi.dto.BookResponse;
+import nl.laura.boekenapi.model.Author;
+import nl.laura.boekenapi.model.Category;
 import nl.laura.boekenapi.repository.AuthorRepository;
 import nl.laura.boekenapi.repository.CategoryRepository;
 import org.junit.jupiter.api.Test;
@@ -21,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@AutoConfigureMockMvc(addFilters = false)   // eenvoudig houden: geen security filters
+@AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 class BooksControllerTest {
 
@@ -32,10 +34,23 @@ class BooksControllerTest {
 
     @Test
     void create() throws Exception {
-        Long authorId = authorRepository.findAll().stream()
-                .findFirst().orElseThrow().getId();
-        Long categoryId = categoryRepository.findAll().stream()
-                .findFirst().orElseThrow().getId();
+        Long authorId;
+        if (authorRepository.findAll().isEmpty()) {
+            Author a = new Author();
+            a.setName("Test Author " + System.currentTimeMillis());
+            authorId = authorRepository.save(a).getId();
+        } else {
+            authorId = authorRepository.findAll().get(0).getId();
+        }
+
+        Long categoryId;
+        if (categoryRepository.findAll().isEmpty()) {
+            Category c = new Category();
+            c.setName("Test Category " + System.currentTimeMillis());
+            categoryId = categoryRepository.save(c).getId();
+        } else {
+            categoryId = categoryRepository.findAll().get(0).getId();
+        }
 
         String title = "Test boek " + System.currentTimeMillis();
 

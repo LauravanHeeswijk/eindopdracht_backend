@@ -30,7 +30,6 @@ class CategoryServiceTest {
     @InjectMocks CategoryService categoryService;
 
 
-    // Test 1: Creëer een nieuwe category (happy flow)
     @Test
     void createOk() {
         CategoryRequest req = new CategoryRequest();
@@ -49,7 +48,6 @@ class CategoryServiceTest {
         assertEquals("Stoicism", result.getName());
     }
 
-    // Test 2: Creeer bestaande category → DuplicateResourceException
     @Test
     void createDuplicate() {
         CategoryRequest req = new CategoryRequest();
@@ -60,7 +58,6 @@ class CategoryServiceTest {
         assertThrows(DuplicateResourceException.class, () -> categoryService.create(req));
     }
 
-    // Test 3: Haal alle categories op (lijst)
     @Test
     void getAllOk() {
         Category c1 = new Category(); c1.setId(1L); c1.setName("A");
@@ -75,7 +72,6 @@ class CategoryServiceTest {
         assertEquals("B", list.get(1).getName());
     }
 
-    // Test 4: Haal category op via id (Happy flow)
     @Test
     void getByIdOk() {
         Category c = new Category(); c.setId(3L); c.setName("Cat");
@@ -87,14 +83,14 @@ class CategoryServiceTest {
         assertEquals("Cat", r.getName());
     }
 
-    // Test 5: Haal category op via id → niet gevonden
+
     @Test
     void getByIdNotFound() {
         when(categoryRepository.findById(999L)).thenReturn(Optional.empty());
         assertThrows(ResourceNotFoundException.class, () -> categoryService.getById(999L));
     }
 
-    // Test 6: Update zonder naamswijziging (no-op)
+
     @Test
     void updateNoChange() {
         Long id = 5L;
@@ -110,7 +106,7 @@ class CategoryServiceTest {
         assertEquals("Same", result.getName());
     }
 
-    // Test 7: Update met nieuwe naam (geen duplicate)
+
     @Test
     void updateChangeOk() {
         Long id = 6L;
@@ -127,7 +123,7 @@ class CategoryServiceTest {
         assertEquals("New", result.getName());
     }
 
-    // Test 8: Update met bestaande naam | DuplicateResourceException
+
     @Test
     void updateDuplicate() {
         Long id = 7L;
@@ -141,7 +137,7 @@ class CategoryServiceTest {
         assertThrows(DuplicateResourceException.class, () -> categoryService.update(id, req));
     }
 
-    // Test 9: Update niet-bestaande category | ResourceNotFoundException
+
     @Test
     void updateNotFound() {
         when(categoryRepository.findById(404L)).thenReturn(Optional.empty());
@@ -152,29 +148,29 @@ class CategoryServiceTest {
         assertThrows(ResourceNotFoundException.class, () -> categoryService.update(404L, req));
     }
 
-    // Test 10: Verwijder category (geen gebruik, happy flow)
+
     @Test
     void deleteOk() {
         Long id = 8L;
         Category c = new Category(); c.setId(id);
         when(categoryRepository.findById(id)).thenReturn(Optional.of(c));
-        when(bookRepository.countByCategory_Id(id)).thenReturn(0L); // categorie niet in gebruik
+        when(bookRepository.countByCategory_Id(id)).thenReturn(0L);
 
         assertDoesNotThrow(() -> categoryService.delete(id));
     }
 
-    // Test 11: Verwijder category in gebruik | DuplicateResourceException
+
     @Test
     void deleteInUse() {
         Long id = 9L;
         Category c = new Category(); c.setId(id);
         when(categoryRepository.findById(id)).thenReturn(Optional.of(c));
-        when(bookRepository.countByCategory_Id(id)).thenReturn(2L); // categorie in gebruik
+        when(bookRepository.countByCategory_Id(id)).thenReturn(2L);
 
         assertThrows(DuplicateResourceException.class, () -> categoryService.delete(id));
     }
 
-    // Test 12: Verwijdr niet-bestaande category | ResourceNotFoundException
+
     @Test
     void deleteNotFound() {
         when(categoryRepository.findById(777L)).thenReturn(Optional.empty());

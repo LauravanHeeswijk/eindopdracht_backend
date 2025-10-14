@@ -57,7 +57,6 @@ public class LibraryService {
 
         libraryItemRepository.findByUserIdAndBookId(user.getId(), bookId)
                 .ifPresent(libraryItemRepository::delete);
-        // idempotent: als er niks is, doen we niks → controller geeft 204
     }
 
     @Transactional(readOnly = true)

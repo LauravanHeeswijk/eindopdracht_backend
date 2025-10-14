@@ -7,9 +7,11 @@ import nl.laura.boekenapi.exception.ResourceNotFoundException;
 import nl.laura.boekenapi.model.Author;
 import nl.laura.boekenapi.model.Book;
 import nl.laura.boekenapi.model.Category;
+import nl.laura.boekenapi.model.FileAsset;
 import nl.laura.boekenapi.repository.AuthorRepository;
 import nl.laura.boekenapi.repository.BookRepository;
 import nl.laura.boekenapi.repository.CategoryRepository;
+import nl.laura.boekenapi.repository.FileAssetRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,10 +31,10 @@ class BookServiceTest {
     @Mock BookRepository bookRepository;
     @Mock AuthorRepository authorRepository;
     @Mock CategoryRepository categoryRepository;
+    @Mock FileAssetRepository fileRepo; //
 
     @InjectMocks BookService bookService;
 
-    // Test 1: Maak een nieuw boek aan (happy flow)
     @Test
     void createOk() {
         BookRequest req = new BookRequest();
@@ -72,7 +74,6 @@ class BookServiceTest {
         assertEquals("Productivity", result.getCategory().getName());
     }
 
-    // Test 2: Aanmaken faalt omdat auteur niet bestaat
     @Test
     void createAuthorNotFound() {
         BookRequest req = new BookRequest();
@@ -85,7 +86,6 @@ class BookServiceTest {
         assertThrows(ResourceNotFoundException.class, () -> bookService.create(req));
     }
 
-    // Test 3: Aanmaken faalt omdat de categorie niet bestaat
     @Test
     void createCategoryNotFound() {
         BookRequest req = new BookRequest();
@@ -102,7 +102,6 @@ class BookServiceTest {
         assertThrows(ResourceNotFoundException.class, () -> bookService.create(req));
     }
 
-    // Test 4: Aanmaken faalt door duplicate titel bij dezelfde auteur
     @Test
     void createDuplicateForSameAuthor() {
         BookRequest req = new BookRequest();
@@ -122,7 +121,6 @@ class BookServiceTest {
         assertThrows(DuplicateResourceException.class, () -> bookService.create(req));
     }
 
-    // Test 5: Haal alle boeken op (lijst)
     @Test
     void getAllOk() {
         Author a = new Author(); a.setId(1L); a.setName("Author A");
@@ -140,7 +138,6 @@ class BookServiceTest {
         assertEquals("T2", list.get(1).getTitle());
     }
 
-    // Test 6: Haal boek op via id (happy flow)
     @Test
     void getByIdOk() {
         Author a = new Author(); a.setId(1L); a.setName("A");
@@ -164,14 +161,12 @@ class BookServiceTest {
         assertEquals("C", r.getCategory().getName());
     }
 
-    // Test 7: Haal boek op via id | niet gevonden
     @Test
     void getByIdNotFound() {
         when(bookRepository.findById(123L)).thenReturn(Optional.empty());
         assertThrows(ResourceNotFoundException.class, () -> bookService.getById(123L));
     }
 
-    // Test 8: Update met zelfde titel en zelfde auteur
     @Test
     void updateSameTitleSameAuthorOk() {
         Long id = 10L;
@@ -206,7 +201,6 @@ class BookServiceTest {
         assertEquals("new", result.getDescription());
     }
 
-    // Test 9: Update met nieuwe titel: geen duplicate
     @Test
     void updateTitleChangedOk() {
         Long id = 20L;
@@ -238,7 +232,6 @@ class BookServiceTest {
         assertEquals(2017, r.getPublicationYear());
     }
 
-    // Test 10: Update met zelfde titel; auteur verandert; geen duplicate
     @Test
     void updateAuthorChangedOk() {
         Long id = 21L;
@@ -272,7 +265,6 @@ class BookServiceTest {
         assertEquals("New", r.getAuthor().getName());
     }
 
-    // Test 11: Update faalt door duplicate titel bij dezelfde auteur
     @Test
     void updateDuplicateForSameAuthor() {
         Long id = 30L;
@@ -301,7 +293,6 @@ class BookServiceTest {
         assertThrows(DuplicateResourceException.class, () -> bookService.update(id, req));
     }
 
-    // Test 12: Update faalt omdat boek niet bestaat
     @Test
     void updateNotFound() {
         when(bookRepository.findById(999L)).thenReturn(Optional.empty());
@@ -313,7 +304,6 @@ class BookServiceTest {
         assertThrows(ResourceNotFoundException.class, () -> bookService.update(999L, req));
     }
 
-    // Test 13: Update faalt omdat auteur niet bestaat
     @Test
     void updateAuthorNotFound() {
         Long id = 40L;
@@ -338,7 +328,6 @@ class BookServiceTest {
         assertThrows(ResourceNotFoundException.class, () -> bookService.update(id, req));
     }
 
-    // Test 14: Update faalt omdat categorie niet bestaat
     @Test
     void updateCategoryNotFound() {
         Long id = 41L;
@@ -364,7 +353,6 @@ class BookServiceTest {
         assertThrows(ResourceNotFoundException.class, () -> bookService.update(id, req));
     }
 
-    // Test 15: Verwijder boek (happy flow)
     @Test
     void deleteOk() {
         Long id = 50L;
@@ -375,10 +363,48 @@ class BookServiceTest {
         assertDoesNotThrow(() -> bookService.delete(id));
     }
 
-    // Test 16: Verwijderen faalt omdat boek niet bestaat
     @Test
     void deleteNotFound() {
         when(bookRepository.findById(777L)).thenReturn(Optional.empty());
         assertThrows(ResourceNotFoundException.class, () -> bookService.delete(777L));
+    }
+
+    @Test
+    void attachFileOk() {
+        Long bookId = 1L;
+        String filename = "file.pdf";
+
+        Book book = new Book();
+        book.setId(bookId);
+
+        FileAsset file = new FileAsset();
+        file.setId(10L);
+        file.setFilename(filename);
+
+        when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
+        when(fileRepo.findAll()).thenReturn(List.of(file));
+
+        BookResponse resp = bookService.attachFile(bookId, filename);
+
+        assertNotNull(resp);
+        assertEquals(bookId, resp.getId());
+    }
+
+    @Test
+    void attachFileBookNotFound() {
+        when(bookRepository.findById(999L)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () -> bookService.attachFile(999L, "x.pdf"));
+    }
+
+    @Test
+    void attachFileFileNotFound() {
+        Long bookId = 2L;
+        Book book = new Book();
+        book.setId(bookId);
+
+        when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
+        when(fileRepo.findAll()).thenReturn(List.of());
+
+        assertThrows(ResourceNotFoundException.class, () -> bookService.attachFile(bookId, "missing.pdf"));
     }
 }

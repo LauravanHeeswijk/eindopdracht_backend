@@ -43,8 +43,6 @@ public class SpringSecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-
-                        // Public
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/authenticate", "/api/health", "/h2-console/**").permitAll()
                         .requestMatchers(HttpMethod.GET,
@@ -54,19 +52,33 @@ public class SpringSecurityConfig {
                                 "/api/files/**"
                         ).permitAll()
 
-                        // Authenticated (ingelogd)
                         .requestMatchers("/api/auth/me").authenticated()
 
-                        // === User library (TOEGEVOEGD) ===
-                        .requestMatchers(HttpMethod.POST,   "/api/me/library/**").hasAnyRole("USER","ADMIN")
-                        .requestMatchers(HttpMethod.GET,    "/api/me/library/**").hasAnyRole("USER","ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/me/library/**").hasAnyRole("USER","ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/me/library/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/me/library/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/me/library/**").hasAnyRole("USER", "ADMIN")
 
-                        // Admin-only CRUD
-                        .requestMatchers(HttpMethod.POST,   "/api/books/**","/api/authors/**","/api/categories").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT,    "/api/books/**","/api/authors/**","/api/categories/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/books/**","/api/authors/**","/api/categories/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST,   "/api/files/upload").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST,
+                                "/api/books",
+                                "/api/books/**",
+                                "/api/authors",
+                                "/api/authors/**",
+                                "/api/categories",
+                                "/api/categories/**",
+                                "/api/files/upload"
+                        ).hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.PUT,
+                                "/api/books/**",
+                                "/api/authors/**",
+                                "/api/categories/**"
+                        ).hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.DELETE,
+                                "/api/books/**",
+                                "/api/authors/**",
+                                "/api/categories/**"
+                        ).hasRole("ADMIN")
 
                         .anyRequest().denyAll()
                 );
@@ -75,4 +87,3 @@ public class SpringSecurityConfig {
         return http.build();
     }
 }
-

@@ -15,7 +15,6 @@ public class BackendEindopdrachtApplication {
         SpringApplication.run(BackendEindopdrachtApplication.class, args);
     }
 
-    // Draait alleen in 'dev', NIET in tests of prod
     @Bean
     @Profile("dev")
     CommandLineRunner authDebug(UserRepository repo, PasswordEncoder enc) {

@@ -32,7 +32,6 @@ public class FileStorageService {
         Files.createDirectories(this.storagePath);
     }
 
-//    Zet bestand in map en onthoud de naam.
     public String storeFile(final MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new FileStorageException("Geen bestand aangeleverd");
